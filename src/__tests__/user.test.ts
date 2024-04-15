@@ -1,15 +1,22 @@
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import mongoose from 'mongoose'
 import supertest from 'supertest'
-import errorMiddleware from '../utils/errorMiddleware'
-import createServer from '../utils/createServer'
+import errorMiddleware from '../middleware/errorMiddleware'
+import createServer from '../utils/createServer.utils'
 import userInputFixture from './fixtures/user/userInput.fixture'
+
+interface IUserInputData {
+  name: string
+  email: string
+  password: string
+  passwordConfirmation?: string
+}
 
 const app = createServer()
 
-describe('User routes', () => {
-  let mongoTestServer: MongoMemoryServer
+let mongoTestServer: MongoMemoryServer
 
+describe('User routes', () => {
   beforeAll(async () => {
     mongoTestServer = await MongoMemoryServer.create()
     await mongoose.connect(mongoTestServer.getUri())
@@ -22,13 +29,7 @@ describe('User routes', () => {
   })
 
   describe('Create user route - sign up', () => {
-    type TInputData = {
-      name: string
-      email: string
-      password: string
-      passwordConfirmation?: string
-    }
-    const inputData: TInputData = {
+    const userInput: IUserInputData = {
       name: '',
       email: '',
       password: '',
@@ -37,10 +38,10 @@ describe('User routes', () => {
 
     beforeEach(() => {
       const { name, email, password } = userInputFixture()
-      inputData.name = name
-      inputData.email = email
-      inputData.password = password
-      inputData.passwordConfirmation = password
+      userInput.name = name
+      userInput.email = email
+      userInput.password = password
+      userInput.passwordConfirmation = password
     })
 
     describe('with a valid input', () => {
@@ -48,7 +49,7 @@ describe('User routes', () => {
         // Create user
         const { body } = await supertest(app)
           .post('/api/users')
-          .send(inputData)
+          .send(userInput)
           .expect(201)
 
         expect(body).toEqual(
@@ -56,8 +57,8 @@ describe('User routes', () => {
             status: 'success',
             data: expect.objectContaining({
               user: expect.objectContaining({
-                name: inputData.name,
-                email: inputData.email
+                name: userInput.name,
+                email: userInput.email
               })
             })
           })
@@ -71,7 +72,7 @@ describe('User routes', () => {
         const { body } = await supertest(app)
           .post('/api/users')
           .send({
-            ...inputData,
+            ...userInput,
             passwordConfirmation: 'WRONG_PSWD'
           })
           .expect(400)
@@ -82,13 +83,13 @@ describe('User routes', () => {
 
     describe('with missing passwordConfirmation input', () => {
       it('should return 400 + correct error message', async () => {
-        const invalidInputData = inputData
-        delete invalidInputData.passwordConfirmation
+        const invalidUserInput = userInput
+        delete invalidUserInput.passwordConfirmation
 
         // Create user
         const { body } = await supertest(app)
           .post('/api/users')
-          .send(invalidInputData)
+          .send(invalidUserInput)
           .expect(400)
 
         expect(body.error.message).toContain('passwordConfirmation is required')
