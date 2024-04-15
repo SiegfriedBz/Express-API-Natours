@@ -1,9 +1,8 @@
 import type { Request, Response, NextFunction } from 'express'
-import type { ZodSchema } from 'zod'
-import logger from '../utils/logger'
+import { AnyZodObject } from 'zod'
 
-const validateRequest = (zodSchema: ZodSchema) => {
-  return async (req: Request, res: Response, next: NextFunction) => {
+export default function validateRequest(zodSchema: AnyZodObject) {
+  return (req: Request, res: Response, next: NextFunction) => {
     try {
       zodSchema.parse({
         body: req.body,
@@ -12,10 +11,7 @@ const validateRequest = (zodSchema: ZodSchema) => {
       })
       next()
     } catch (err: unknown) {
-      logger.error((err as Error).message)
       next(err)
     }
   }
 }
-
-export default validateRequest
