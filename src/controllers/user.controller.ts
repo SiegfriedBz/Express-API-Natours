@@ -2,6 +2,7 @@ import { createUser } from '../services/user.service'
 import type { Request, Response, NextFunction } from 'express'
 import type { TCreateUserInput } from '../zodSchema/user.zodSchema'
 
+/** Signup */
 export const createUserHandler = async (
   req: Request<object, object, TCreateUserInput['body']>,
   res: Response,
