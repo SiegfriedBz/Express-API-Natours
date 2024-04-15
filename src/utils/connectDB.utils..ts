@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 import config from 'config'
-import logger from './logger'
+import logger from './logger.utils'
 
 async function connectDb() {
   const ENV = process.env.NODE_ENV
