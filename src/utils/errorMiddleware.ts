@@ -1,11 +1,13 @@
 import AppError from './AppError'
 import { ZodError } from 'zod'
-import type { Request, Response } from 'express'
+import type { NextFunction, Request, Response } from 'express'
 
 export default function errorMiddleware(
   err: unknown,
   req: Request,
-  res: Response
+  res: Response,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  next: NextFunction
 ) {
   let error = err
 

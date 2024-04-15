@@ -3,9 +3,8 @@ import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import routes from '../routes'
-import errorMiddleware from './errorMiddleware'
 
-const createServer = () => {
+export default function createServer() {
   const app = express()
 
   app.use(
@@ -19,9 +18,5 @@ const createServer = () => {
 
   routes(app)
 
-  app.use(errorMiddleware)
-
   return app
 }
-
-export default createServer
