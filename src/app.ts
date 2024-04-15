@@ -1,9 +1,9 @@
 import 'dotenv/config'
 import config from 'config'
-import logger from './utils/logger'
-import createServer from './utils/createServer'
-import connectDb from './utils/connectDB'
-import errorMiddleware from './utils/errorMiddleware'
+import logger from './utils/logger.utils'
+import createServer from './utils/createServer.utils'
+import connectDb from './utils/connectDB.utils.'
+import errorMiddleware from './middleware/errorMiddleware'
 
 const port = config.get<number>('port')
 
