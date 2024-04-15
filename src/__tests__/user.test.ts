@@ -8,17 +8,17 @@ import userInputFixture from './fixtures/user/userInput.fixture'
 const app = createServer()
 
 describe('User routes', () => {
+  let mongoTestServer: MongoMemoryServer
+
   beforeAll(async () => {
-    const mongoTestServer = await MongoMemoryServer.create()
-
+    mongoTestServer = await MongoMemoryServer.create()
     await mongoose.connect(mongoTestServer.getUri())
-
     // Error handler middleware
     app.use(errorMiddleware)
   })
   afterAll(async () => {
     await mongoose.disconnect()
-    await mongoose.connection.close()
+    await mongoTestServer.stop()
   })
 
   describe('Create user route - sign up', () => {
@@ -66,7 +66,7 @@ describe('User routes', () => {
     })
 
     describe('when passwords do not match', () => {
-      it('should return 400 + error message', async () => {
+      it('should return 400 + correct error message', async () => {
         // Create user
         const { body } = await supertest(app)
           .post('/api/users')
@@ -81,7 +81,7 @@ describe('User routes', () => {
     })
 
     describe('with missing passwordConfirmation input', () => {
-      it('should return 400 + error message', async () => {
+      it('should return 400 + correct error message', async () => {
         const invalidInputData = inputData
         delete invalidInputData.passwordConfirmation
 
