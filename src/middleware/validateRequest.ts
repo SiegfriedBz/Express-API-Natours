@@ -1,3 +1,4 @@
+import logger from '../utils/logger.utils'
 import type { Request, Response, NextFunction } from 'express'
 import type { AnyZodObject } from 'zod'
 
@@ -9,8 +10,10 @@ export default function validateRequest(zodSchema: AnyZodObject) {
         query: req.query,
         params: req.params
       })
+
       next()
     } catch (err: unknown) {
+      logger.info({ err })
       next(err)
     }
   }
