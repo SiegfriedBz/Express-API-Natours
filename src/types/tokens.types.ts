@@ -10,6 +10,6 @@ export interface IDecodedToken {
 
 export interface IFreshAccessToken {
   freshAccessToken: string
-  user: IUserDocument
+  user: Omit<IUserDocument, 'password'>
   sessionId: Types.ObjectId
 }
