@@ -1,15 +1,5 @@
 import mongoose from 'mongoose'
-import type { IUserDocument } from './user.model'
-
-export interface ISessionInput {
-  user: IUserDocument['_id']
-  isValid: boolean
-}
-
-export interface ISessionDocument extends ISessionInput, mongoose.Document {
-  createdAt: Date
-  updatedAt: Date
-}
+import type { ISessionDocument } from '../types/session.types'
 
 const sessionSchema = new mongoose.Schema(
   {
