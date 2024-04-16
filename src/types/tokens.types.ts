@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
-import type { IUserDocument } from '../models/user.model'
 import type { Types } from 'mongoose'
+import type { IUserDocument } from './user.types'
 
 export interface IDecodedToken {
   valid: boolean
