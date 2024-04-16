@@ -3,7 +3,7 @@ import { reIssueAccessToken } from '../services/session.service'
 import { verifyJWT } from '../utils/jwt.utils'
 import setTokenCookieOptions from '../utils/setTokenCookieOptions.utils'
 import type { Request, Response, NextFunction } from 'express'
-import type { IFreshAccessToken } from '../types'
+import type { IFreshAccessToken } from '../types/tokens.types'
 
 export default async function deserializeAndRefreshUser(
   req: Request,
