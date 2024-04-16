@@ -1,10 +1,13 @@
-// Expected by SERVICE createUser
-const userInputFixture = () => {
+export const CORRECT_PASSWORD = '123456'
+
+export const inputFixtureUserAs = (as: 'user' | 'admin') => {
+  const id = crypto.randomUUID()
+
   return {
-    name: 'Jess',
-    email: `jess-${crypto.randomUUID()}@example.com`,
-    password: '123456'
+    name: `I am a ${as}`,
+    email: `${as}-${id}@example.com`,
+    role: as,
+    password: CORRECT_PASSWORD,
+    passwordConfirmation: CORRECT_PASSWORD
   }
 }
-
-export default userInputFixture
