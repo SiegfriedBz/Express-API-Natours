@@ -1,6 +1,8 @@
 import express from 'express'
 import {
   createUserHandler,
+  updateMeHandler,
+  updateMyPasswordHandler,
   updateUserHandler
 } from '../controllers/user.controller'
 import validateRequest from '../middleware/validateRequest'
@@ -8,7 +10,9 @@ import requireUser from '../middleware/requireUser'
 import restrictTo from '../middleware/restrictTo'
 import {
   createUserZodSchema,
-  adminUpdateUserZodSchema
+  adminUpdateUserZodSchema,
+  updateMeZodSchema,
+  updateMyPasswordZodSchema
 } from '../zodSchema/user.zodSchema'
 
 const router = express.Router()
@@ -18,6 +22,13 @@ router.route('/').post(validateRequest(createUserZodSchema), createUserHandler)
 
 // User-protected routes
 router.use(requireUser)
+
+router
+  .route('/update-me')
+  .put(validateRequest(updateMeZodSchema), updateMeHandler)
+router
+  .route('/update-my-password')
+  .patch(validateRequest(updateMyPasswordZodSchema), updateMyPasswordHandler)
 
 // Admin-protected routes
 router.use(restrictTo('admin'))
