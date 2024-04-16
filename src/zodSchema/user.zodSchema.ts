@@ -1,11 +1,24 @@
 import z from 'zod'
 
+const ROLES = ['admin', 'lead-guide', 'guide', 'user'] as const
+
+const bodyBase = {
+  name: z.string({
+    required_error: 'Name is required'
+  })
+}
+
+const params = {
+  params: z.object({
+    userId: z.string()
+  })
+}
+
+// Create user - Signup
 const createUserZodSchema = z.object({
   body: z
     .object({
-      name: z.string({
-        required_error: 'Name is required'
-      }),
+      ...bodyBase,
       email: z
         .string({
           required_error: 'Email is required'
@@ -25,6 +38,18 @@ const createUserZodSchema = z.object({
       path: ['passwordConfirmation']
     })
 })
+type TCreateUserInput = z.TypeOf<typeof createUserZodSchema>
 
-export { createUserZodSchema }
-export type TCreateUserInput = z.TypeOf<typeof createUserZodSchema>
+// Admin update user
+const adminUpdateUserZodSchema = z.object({
+  body: z.object({
+    ...bodyBase,
+    role: z.enum(ROLES, { required_error: 'Role is required' })
+  }),
+  ...params
+})
+
+type TAdminUpdateUserInput = z.TypeOf<typeof adminUpdateUserZodSchema>
+
+export { createUserZodSchema, adminUpdateUserZodSchema }
+export type { TCreateUserInput, TAdminUpdateUserInput }
