@@ -1,6 +1,6 @@
 import config from 'config'
 import jwt, { JsonWebTokenError } from 'jsonwebtoken'
-import { IDecodedToken } from '../types'
+import type { IDecodedToken } from '../types/tokens.types'
 
 export function signJWT({
   payload,
