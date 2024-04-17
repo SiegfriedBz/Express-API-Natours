@@ -1,11 +1,16 @@
-import { NextFunction, Request, Response } from 'express'
-import { TCreateSessionInput } from '../zodSchema/session.zodSchema'
+import { omit } from 'lodash'
 import { checkPassword } from '../services/user.service'
-import AppError from '../utils/AppError.utils'
-import { createSession, updateSession } from '../services/session.service'
-import { signJWT } from '../utils/jwt.utils'
+import {
+  createSession,
+  generateTokens,
+  updateSession
+} from '../services/session.service'
 import setTokenCookieOptions from '../utils/setTokenCookieOptions.utils'
+import AppError from '../utils/AppError.utils'
 import logger from '../utils/logger.utils'
+import type { NextFunction, Request, Response } from 'express'
+import type { TCreateSessionInput } from '../zodSchema/session.zodSchema'
+import type { IUserDocument } from '../types/user.types'
 
 /** Login */
 export const createSessionHandler = async (
@@ -33,19 +38,29 @@ export const createSessionHandler = async (
     // 2. Create a Session
     const newSession = await createSession(user._id)
 
-    // 3. Create access token
-    const accessToken = signJWT({
-      payload: { user, sessionId: newSession._id },
-      tokenType: 'accessToken'
+    if (!newSession) {
+      return next(
+        new AppError({
+          statusCode: 500,
+          message: 'Something went wring while creating session'
+        })
+      )
+    }
+
+    // 3. Create Tokens
+    // 3.1 Remove password from user
+    const userWithoutPassword = omit(
+      user.toObject(),
+      'password'
+    ) as unknown as Omit<IUserDocument, 'password'>
+
+    // 3.2 Create tokens
+    const { accessToken, refreshToken } = generateTokens({
+      user: userWithoutPassword,
+      sessionId: newSession._id
     })
 
-    // 4. Create refresh token
-    const refreshToken = signJWT({
-      payload: { user, sessionId: newSession._id },
-      tokenType: 'refreshToken'
-    })
-
-    // 5. Set cookies
+    // 4. Set cookies
     res.cookie('accessToken', accessToken, setTokenCookieOptions('accessToken'))
     res.cookie(
       'refreshToken',
@@ -53,7 +68,7 @@ export const createSessionHandler = async (
       setTokenCookieOptions('refreshToken')
     )
 
-    // 6. Send access + refresh tokens
+    // 5. Send access + refresh tokens
     res.status(200).json({
       status: 'success'
     })

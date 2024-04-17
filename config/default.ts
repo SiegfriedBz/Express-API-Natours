@@ -1,8 +1,4 @@
 export default {
-  port: '',
-  appDomainName: '',
-  dbUri: '',
-  cors: { allowedOrigins: '' },
   bcrypt: { saltWorkFactor: 10 },
   cookies: {
     accessTokenCookieTimeToLive: 1000 * 60 * 15, // 15min
@@ -10,15 +6,6 @@ export default {
   },
   tokens: {
     accessTokenTimeToLive: '15m',
-    refreshTokenTimeToLive: '1y',
-    accessTokenPrivateKey: '',
-    accessTokenPublicKey: '',
-    refreshTokenPrivateKey: '',
-    refreshTokenPublicKey: ''
-  },
-  google: {
-    clientId: '',
-    clientSecret: '',
-    redirectUri: ''
+    refreshTokenTimeToLive: '1y'
   }
 }

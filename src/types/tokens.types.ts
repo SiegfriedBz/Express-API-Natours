@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
-import type { IUserDocument } from '../models/user.model'
 import type { Types } from 'mongoose'
+import type { IUserDocument } from './user.types'
 
 export interface IDecodedToken {
   valid: boolean
@@ -10,6 +10,6 @@ export interface IDecodedToken {
 
 export interface IFreshAccessToken {
   freshAccessToken: string
-  user: IUserDocument
+  user: Omit<IUserDocument, 'password'>
   sessionId: Types.ObjectId
 }

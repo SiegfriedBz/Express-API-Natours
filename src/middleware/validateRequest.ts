@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express'
-import { AnyZodObject } from 'zod'
+import type { AnyZodObject } from 'zod'
 
 export default function validateRequest(zodSchema: AnyZodObject) {
   return (req: Request, res: Response, next: NextFunction) => {
@@ -9,6 +9,7 @@ export default function validateRequest(zodSchema: AnyZodObject) {
         query: req.query,
         params: req.params
       })
+
       next()
     } catch (err: unknown) {
       next(err)

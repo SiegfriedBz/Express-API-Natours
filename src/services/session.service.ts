@@ -1,20 +1,21 @@
 import { getUser } from './user.service'
-import Session, {
-  type ISessionDocument,
-  ISessionInput
-} from '../models/session.model'
+import Session from '../models/session.model'
 import { signJWT, verifyJWT } from '../utils/jwt.utils'
 import type { FilterQuery, Types, UpdateQuery } from 'mongoose'
 import type { JwtPayload } from 'jsonwebtoken'
-import type { IDecodedToken, IFreshAccessToken } from '../types'
+import type { ISessionDocument, ISessionDBInput } from '../types/session.types'
+import type { IDecodedToken, IFreshAccessToken } from '../types/tokens.types'
+import type { IUserDocument } from '../types/user.types'
 
-async function getSession(sessionId: Types.ObjectId) {
+type TReturnSession = Promise<ISessionDocument | null>
+
+async function getSession(sessionId: Types.ObjectId): TReturnSession {
   const session = await Session.findById(sessionId).lean()
 
   return session
 }
 
-export async function createSession(userId: Types.ObjectId) {
+export async function createSession(userId: Types.ObjectId): TReturnSession {
   const newSession = await Session.create({ user: userId })
 
   return newSession
@@ -22,13 +23,31 @@ export async function createSession(userId: Types.ObjectId) {
 
 export async function updateSession(
   filter: FilterQuery<ISessionDocument>,
-  update: UpdateQuery<ISessionInput> // prevent createdAt, updatedAt update
-) {
+  update: UpdateQuery<ISessionDBInput> // prevent createdAt, updatedAt update
+): TReturnSession {
   const updatedSession = await Session.findOneAndUpdate(filter, update, {
     new: true
   })
 
   return updatedSession
+}
+
+// Generate Tokens
+type TGenerateTokens = {
+  user: Omit<IUserDocument, 'password'>
+  sessionId: Types.ObjectId
+}
+export const generateTokens = ({ user, sessionId }: TGenerateTokens) => {
+  const accessToken = signJWT({
+    payload: { user, sessionId },
+    tokenType: 'accessToken'
+  })
+
+  const refreshToken = signJWT({
+    payload: { user, sessionId },
+    tokenType: 'refreshToken'
+  })
+  return { accessToken, refreshToken }
 }
 
 // use refreshToken to issue a fresh accessToken

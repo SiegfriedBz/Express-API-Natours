@@ -4,14 +4,9 @@ import supertest from 'supertest'
 import errorMiddleware from '../middleware/errorMiddleware'
 import createServer from '../utils/createServer.utils'
 import { verifyJWT } from '../utils/jwt.utils'
-import userInputFixture from './fixtures/user/userInput.fixture'
-import type { IDecodedToken } from '../types'
-
-interface IUserInputData {
-  email?: string
-  password?: string
-  name?: string
-}
+import { getTokensFrom } from './utils.ts/getTokensFrom'
+import { inputFixtureUserAs } from './fixtures/user/userInput.fixture'
+import type { IDecodedToken } from '../types/tokens.types'
 
 const app = createServer()
 
@@ -29,63 +24,37 @@ describe('Session routes', () => {
     await mongoTestServer.stop()
   })
 
-  let accessToken: string = ''
-  let refreshToken: string = ''
-
-  const userInput: IUserInputData = {
+  /** CREATE USER - SIGNUP */
+  const userInput = {
+    name: '',
     email: '',
     password: '',
-    name: ''
+    passwordConfirmation: ''
   }
-
-  /** CREATE USER */
   beforeEach(async () => {
-    const { name, email, password } = userInputFixture()
+    const { name, email, password, passwordConfirmation } =
+      inputFixtureUserAs('user')
+    userInput.name = name
     userInput.email = email
     userInput.password = password
-    userInput.name = name
+    userInput.passwordConfirmation = passwordConfirmation
 
-    // Create user - Signup
-    await supertest(app)
-      .post('/api/users')
-      .send({
-        ...userInput,
-        passwordConfirmation: userInput.password
-      })
-      .expect(201)
+    await supertest(app).post('/api/users').send(userInput).expect(201)
   })
 
   describe('Create session route - login', () => {
-    describe('with a valid email + password', () => {
+    describe('With a valid email + password', () => {
       it('should return 200 + cookies: valid accessToken + valid refreshToken', async () => {
-        // Login user
+        /** LOGIN USER */
         const { body, headers } = await supertest(app)
           .post('/api/sessions')
           .send({ email: userInput.email, password: userInput.password })
           .expect(200)
 
-        // Check Status
         expect(body.status).toBe('success')
 
-        // Check Cookies
-        const cookies = headers?.['set-cookie'] as unknown as
-          | string[]
-          | undefined
-
-        // Iterate over each cookie in the array
-        cookies &&
-          cookies.forEach((cookie) => {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const [cookieNameAndValue, ...rest] = cookie.split(';')
-            const [name, value] = cookieNameAndValue.split('=')
-
-            if (name === 'accessToken') {
-              accessToken = value
-            }
-            if (name === 'refreshToken') {
-              refreshToken = value
-            }
-          })
+        // Get tokens from cookies
+        const { accessToken, refreshToken } = getTokensFrom(headers)
 
         // Check tokens are valid JWT
         const decodedAccessToken = verifyJWT({
@@ -102,7 +71,7 @@ describe('Session routes', () => {
       })
     })
 
-    describe('with an invalid email / password', () => {
+    describe('With an invalid email / password', () => {
       it('should return 401 + error message + undefined cookies', async () => {
         // Login user
         const { body, headers } = await supertest(app)
@@ -135,21 +104,8 @@ describe('Session routes', () => {
           .send({ email: userInput.email, password: userInput.password })
           .expect(200)
 
-        // Exctract cookies
-        const cookies = headers?.['set-cookie'] as unknown as
-          | string[]
-          | undefined
-
-        cookies &&
-          cookies.forEach((cookie) => {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const [cookieNameAndValue, ...rest] = cookie.split(';')
-            const [name, value] = cookieNameAndValue.split('=')
-
-            if (name === 'accessToken') {
-              accessToken = value
-            }
-          })
+        // Get tokens from cookies
+        const { accessToken } = getTokensFrom(headers)
 
         accessTokenCookie = `accessToken=${accessToken}`
       })
@@ -163,25 +119,8 @@ describe('Session routes', () => {
 
         expect(body.status).toBe('success')
 
-        // Check cookies
-        // Exctract cookies
-        const cookies = headers?.['set-cookie'] as unknown as
-          | string[]
-          | undefined
-
-        cookies &&
-          cookies.forEach((cookie) => {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const [cookieNameAndValue, ...rest] = cookie.split(';')
-            const [name, value] = cookieNameAndValue.split('=')
-
-            if (name === 'accessToken') {
-              accessToken = value
-            }
-            if (name === 'refreshToken') {
-              refreshToken = value
-            }
-          })
+        // Get tokens from cookies
+        const { accessToken, refreshToken } = getTokensFrom(headers)
 
         // Check tokens are valid JWT
         const decodedAccessToken = verifyJWT({

@@ -1,23 +1,22 @@
 import config from 'config'
 import mongoose from 'mongoose'
 import bcrypt from 'bcrypt'
-
-export interface IUserInput {
-  name: string
-  email: string
-  password: string
-}
-export interface IUserDocument extends IUserInput, mongoose.Document {
-  createdAt: Date
-  updatedAt: Date
-  comparePassword: (candidatePassword: string) => Promise<boolean>
-}
+import { IUserDocument } from '../types/user.types'
 
 const userSchema = new mongoose.Schema(
   {
     email: { type: String, unique: true, required: true },
     name: { type: String, required: true },
-    password: { type: String, required: true }
+    password: { type: String, required: true },
+    photo: { type: String },
+    role: {
+      type: String,
+      enum: {
+        values: ['admin', 'lead-guide', 'guide', 'user'],
+        message: "A role must be 'admin', 'lead-guide', 'guide' or 'user'"
+      },
+      default: 'user'
+    }
   },
   { timestamps: true }
 )
