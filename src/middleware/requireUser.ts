@@ -12,7 +12,7 @@ export default async function requireUser(
   if (!userId) {
     return next(
       new AppError({
-        statusCode: 403,
+        statusCode: 401,
         message: `Please login to access this resource`
       })
     )

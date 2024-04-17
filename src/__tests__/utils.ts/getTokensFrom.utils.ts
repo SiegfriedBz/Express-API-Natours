@@ -1,4 +1,8 @@
-export const getTokensFrom = (headers: { [index: string]: string }) => {
+type TProps = {
+  headers: { [index: string]: string }
+}
+
+export const getTokensFrom = ({ headers }: TProps) => {
   let accessToken: string = ''
   let refreshToken: string = ''
 

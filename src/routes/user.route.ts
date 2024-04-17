@@ -17,8 +17,10 @@ import {
 
 const router = express.Router()
 
-// User Signup
-router.route('/').post(validateRequest(createUserZodSchema), createUserHandler)
+router
+  .route('/')
+  /** SIGNUP */
+  .post(validateRequest(createUserZodSchema), createUserHandler)
 
 // User-protected routes
 router.use(requireUser)

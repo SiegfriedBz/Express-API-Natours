@@ -1,11 +1,13 @@
 import { MongoMemoryServer } from 'mongodb-memory-server'
-import mongoose from 'mongoose'
 import supertest from 'supertest'
-import errorMiddleware from '../middleware/errorMiddleware'
 import createServer from '../utils/createServer.utils'
+import { handleMongoTestServer } from './utils.ts/handleMongoTestServer.utils'
+import { createUserAs } from './utils.ts/createUserAs.utils'
+import { loginAs } from './utils.ts/loginAs.utils'
 import { verifyJWT } from '../utils/jwt.utils'
-import { getTokensFrom } from './utils.ts/getTokensFrom'
-import { inputFixtureUserAs } from './fixtures/user/userInput.fixture'
+import { getTokensFrom } from './utils.ts/getTokensFrom.utils'
+import { CORRECT_PASSWORD } from './fixtures/user/userAsInput.fixture'
+import type { IUserDocument } from '../types/user.types'
 import type { IDecodedToken } from '../types/tokens.types'
 
 const app = createServer()
@@ -13,33 +15,12 @@ const app = createServer()
 let mongoTestServer: MongoMemoryServer
 
 describe('Session routes', () => {
-  beforeAll(async () => {
-    mongoTestServer = await MongoMemoryServer.create()
-    await mongoose.connect(mongoTestServer.getUri())
-    // Error handler middleware
-    app.use(errorMiddleware)
-  })
-  afterAll(async () => {
-    await mongoose.disconnect()
-    await mongoTestServer.stop()
-  })
+  handleMongoTestServer({ mongoTestServer, app })
 
-  /** CREATE USER - SIGNUP */
-  const userInput = {
-    name: '',
-    email: '',
-    password: '',
-    passwordConfirmation: ''
-  }
+  // 1. Create user by using service
+  let user: IUserDocument | null = null
   beforeEach(async () => {
-    const { name, email, password, passwordConfirmation } =
-      inputFixtureUserAs('user')
-    userInput.name = name
-    userInput.email = email
-    userInput.password = password
-    userInput.passwordConfirmation = passwordConfirmation
-
-    await supertest(app).post('/api/users').send(userInput).expect(201)
+    user = await createUserAs({ as: 'user' })
   })
 
   describe('Create session route - login', () => {
@@ -48,13 +29,16 @@ describe('Session routes', () => {
         /** LOGIN USER */
         const { body, headers } = await supertest(app)
           .post('/api/sessions')
-          .send({ email: userInput.email, password: userInput.password })
+          .send({
+            email: (user as IUserDocument).email,
+            password: CORRECT_PASSWORD
+          })
           .expect(200)
 
         expect(body.status).toBe('success')
 
         // Get tokens from cookies
-        const { accessToken, refreshToken } = getTokensFrom(headers)
+        const { accessToken, refreshToken } = getTokensFrom({ headers })
 
         // Check tokens are valid JWT
         const decodedAccessToken = verifyJWT({
@@ -72,11 +56,14 @@ describe('Session routes', () => {
     })
 
     describe('With an invalid email / password', () => {
-      it('should return 401 + error message + undefined cookies', async () => {
+      it('should return 401 + correct error message + undefined cookies', async () => {
         // Login user
         const { body, headers } = await supertest(app)
           .post('/api/sessions')
-          .send({ email: userInput.email, password: 'WRONG_PASSWORD' })
+          .send({
+            email: (user as IUserDocument).email,
+            password: 'WRONG_PASSWORD'
+          })
           .expect(401)
 
         // Check Status
@@ -95,32 +82,29 @@ describe('Session routes', () => {
 
   describe('Delete session route - logout', () => {
     describe('When the user is logged in', () => {
-      let accessTokenCookie: string = ''
+      let userAccessTokenCookie: string = ''
 
+      // Login user
       beforeEach(async () => {
-        // Login user
-        const { headers } = await supertest(app)
-          .post('/api/sessions')
-          .send({ email: userInput.email, password: userInput.password })
-          .expect(200)
+        const { accessTokenCookie } = await loginAs({
+          asDocument: user as IUserDocument,
+          app
+        })
 
-        // Get tokens from cookies
-        const { accessToken } = getTokensFrom(headers)
-
-        accessTokenCookie = `accessToken=${accessToken}`
+        userAccessTokenCookie = accessTokenCookie
       })
 
       it('should log out the user and nullify its cookies', async () => {
         // logout user
         const { body, headers } = await supertest(app)
           .delete('/api/sessions')
-          .set('Cookie', accessTokenCookie as string)
+          .set('Cookie', userAccessTokenCookie as string)
           .expect(200)
 
         expect(body.status).toBe('success')
 
         // Get tokens from cookies
-        const { accessToken, refreshToken } = getTokensFrom(headers)
+        const { accessToken, refreshToken } = getTokensFrom({ headers })
 
         // Check tokens are valid JWT
         const decodedAccessToken = verifyJWT({
@@ -138,11 +122,11 @@ describe('Session routes', () => {
     })
 
     describe('When the user is NOT logged in', () => {
-      it('should return a 403', async () => {
+      it('should return a 401 + correct eroor message', async () => {
         // logout user
         const { body } = await supertest(app)
           .delete('/api/sessions')
-          .expect(403)
+          .expect(401)
 
         expect(body.status).toBe('fail')
         expect(body.error.message).toContain(
