@@ -1,14 +1,15 @@
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import mongoose from 'mongoose'
 import supertest from 'supertest'
-import User from '../models/user.model'
-import errorMiddleware from '../middleware/errorMiddleware'
 import createServer from '../utils/createServer.utils'
-import { getTokensFrom } from './utils.ts/getTokensFrom'
+import { handleMongoTestServer } from './utils.ts/handleMongoTestServer.utils'
+import { createUserAs } from './utils.ts/createUserAs.utils'
+import { loginAs } from './utils.ts/loginAs.utils'
+import { getTokensFrom } from './utils.ts/getTokensFrom.utils'
 import {
   CORRECT_PASSWORD,
-  inputFixtureUserAs
-} from './fixtures/user/userInput.fixture'
+  createUserAsInput
+} from './fixtures/user/userAsInput.fixture'
 import type { IUserDocument } from '../types/user.types'
 
 const app = createServer()
@@ -16,16 +17,7 @@ const app = createServer()
 let mongoTestServer: MongoMemoryServer
 
 describe('User routes', () => {
-  beforeAll(async () => {
-    mongoTestServer = await MongoMemoryServer.create()
-    await mongoose.connect(mongoTestServer.getUri())
-    // Error handler middleware
-    app.use(errorMiddleware)
-  })
-  afterAll(async () => {
-    await mongoose.disconnect()
-    await mongoTestServer.stop()
-  })
+  handleMongoTestServer({ mongoTestServer, app })
 
   const userInput = {
     name: '',
@@ -35,7 +27,7 @@ describe('User routes', () => {
   }
 
   beforeEach(() => {
-    const { name, email, password } = inputFixtureUserAs('user')
+    const { name, email, password } = createUserAsInput({ as: 'user' })
     userInput.name = name
     userInput.email = email
     userInput.password = password
@@ -105,36 +97,27 @@ describe('User routes', () => {
     let admin: IUserDocument | null = null
     let user: IUserDocument | null = null
 
+    // Create user & admin by using service
     beforeEach(async () => {
-      // 1. Create user
-      user = await User.create(inputFixtureUserAs('user'))
-      user = user.toObject()
-      // 2 Create Admin
-      admin = await User.create(inputFixtureUserAs('admin'))
-      admin = admin.toObject()
+      user = await createUserAs({ as: 'user' })
+      admin = await createUserAs({ as: 'admin' })
     })
 
     describe('When Admin logged in', () => {
       let adminAccessTokenCookie: string = ''
 
       beforeEach(async () => {
-        // 3. Login as Admin
-        const { headers: adminHeaders } = await supertest(app)
-          .post('/api/sessions')
-          .send({
-            email: (admin as IUserDocument).email,
-            password: CORRECT_PASSWORD
-          })
-          .expect(200)
-
-        // Get tokens from cookies
-        const { accessToken: adminAccessToken } = getTokensFrom(adminHeaders)
-        adminAccessTokenCookie = `accessToken=${adminAccessToken}`
+        // Login as Admin
+        const { accessTokenCookie } = await loginAs({
+          asDocument: admin as IUserDocument,
+          app
+        })
+        adminAccessTokenCookie = accessTokenCookie
       })
 
       describe('When userId is valid', () => {
         it('should send a 200 + updated user', async () => {
-          // 4. Update user as Admin
+          // Update user as Admin
           const newName = `name-${crypto.randomUUID()}`
           const updateUserData = {
             ...user,
@@ -156,7 +139,7 @@ describe('User routes', () => {
 
       describe('When userId does NOT exist', () => {
         it('should send a 404 + correct error message', async () => {
-          // 4. Update user as Admin
+          // Update user as Admin
           const updateUserData = {
             ...user,
             name: 'NEW_NAME',
@@ -177,22 +160,16 @@ describe('User routes', () => {
       })
     })
 
-    describe('When Admin is NOT logged in - & User is logged in ', () => {
+    describe('When Admin is NOT logged in & User is logged in ', () => {
       it('should send a 403 + correct error message', async () => {
-        // 3. Login as User
-        const { headers: userHeaders } = await supertest(app)
-          .post('/api/sessions')
-          .send({
-            email: (user as IUserDocument).email,
-            password: CORRECT_PASSWORD
-          })
-          .expect(200)
+        // Login as User
+        const { accessTokenCookie } = await loginAs({
+          asDocument: user as IUserDocument,
+          app
+        })
+        const userAccessTokenCookie = accessTokenCookie
 
-        // Get tokens from cookies
-        const { accessToken: userAccessToken } = getTokensFrom(userHeaders)
-
-        // 4. Update user as user
-        const userAccessTokenCookie = `accessToken=${userAccessToken}`
+        // Update user as user
         const updateUserData = {
           ...user,
           name: 'NEW_NAME',
@@ -216,10 +193,9 @@ describe('User routes', () => {
   describe('User - UpdateMe route', () => {
     let user: IUserDocument | null = null
 
+    // Create user by using service
     beforeEach(async () => {
-      // 1. Create user
-      user = await User.create(inputFixtureUserAs('user'))
-      user = user.toObject()
+      user = await createUserAs({ as: 'user' })
     })
 
     describe('When user is logged in', () => {
@@ -229,19 +205,13 @@ describe('User routes', () => {
 
       // Login as User
       beforeEach(async () => {
-        const { headers: userHeaders } = await supertest(app)
-          .post('/api/sessions')
-          .send({
-            email: (user as IUserDocument).email,
-            password: CORRECT_PASSWORD
-          })
-          .expect(200)
-
-        // Get tokens from cookies
-        const { accessToken, refreshToken } = getTokensFrom(userHeaders)
+        const { accessToken, refreshToken, accessTokenCookie } = await loginAs({
+          asDocument: user as IUserDocument,
+          app
+        })
         userAccessTokenInit = accessToken
         userRefreshTokenInit = refreshToken
-        userAccessTokenCookieInit = `accessToken=${accessToken}`
+        userAccessTokenCookieInit = accessTokenCookie
       })
 
       it('should send a 200 + updated user + NEW Access & Refresh Tokens', async () => {
@@ -261,14 +231,14 @@ describe('User routes', () => {
         expect(body.data.user.name).toBe(newName)
 
         const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
-          getTokensFrom(headers)
+          getTokensFrom({ headers })
         expect(newAccessToken).not.toBe(userAccessTokenInit)
         expect(newRefreshToken).not.toBe(userRefreshTokenInit)
       })
     })
 
     describe('When user is NOT logged in', () => {
-      it('should send a 403 + correct error message', async () => {
+      it('should send a 401 + correct error message', async () => {
         const newName = `name-${crypto.randomUUID()}`
         const updateUserData = {
           ...user,
@@ -278,7 +248,7 @@ describe('User routes', () => {
         const { body } = await supertest(app)
           .put('/api/users/update-me')
           .send(updateUserData)
-          .expect(403)
+          .expect(401)
 
         expect(body.status).toBe('fail')
         expect(body.error.message).toBe('Please login to access this resource')
@@ -289,10 +259,9 @@ describe('User routes', () => {
   describe('User - UpdateMyPassword route', () => {
     let user: IUserDocument | null = null
 
+    // Create user by using service
     beforeEach(async () => {
-      // 1. Create user
-      user = await User.create(inputFixtureUserAs('user'))
-      user = user.toObject()
+      user = await createUserAs({ as: 'user' })
     })
 
     describe('When user is logged in', () => {
@@ -300,17 +269,11 @@ describe('User routes', () => {
 
       // Login as User
       beforeEach(async () => {
-        const { headers: userHeaders } = await supertest(app)
-          .post('/api/sessions')
-          .send({
-            email: (user as IUserDocument).email,
-            password: CORRECT_PASSWORD
-          })
-          .expect(200)
-
-        // Get tokens from cookies
-        const { accessToken } = getTokensFrom(userHeaders)
-        userAccessTokenCookieInit = `accessToken=${accessToken}`
+        const { accessTokenCookie } = await loginAs({
+          asDocument: user as IUserDocument,
+          app
+        })
+        userAccessTokenCookieInit = accessTokenCookie
       })
 
       describe('When user inputs correct current Password', () => {
@@ -331,7 +294,7 @@ describe('User routes', () => {
           expect(body.data.user.name).toBe(userInput.name)
 
           const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
-            getTokensFrom(headers)
+            getTokensFrom({ headers })
           expect(newAccessToken).toBeUndefined
           expect(newRefreshToken).toBeUndefined
 
@@ -369,7 +332,7 @@ describe('User routes', () => {
     })
 
     describe('When user is NOT logged in', () => {
-      it('should send a 403 + correct error message', async () => {
+      it('should send a 401 + correct error message', async () => {
         const updatePasswordData = {
           currentPassword: CORRECT_PASSWORD,
           password: 'NEW_PASSWORD',
@@ -379,7 +342,7 @@ describe('User routes', () => {
         const { body } = await supertest(app)
           .patch('/api/users/update-my-password')
           .send(updatePasswordData)
-          .expect(403)
+          .expect(401)
 
         expect(body.status).toBe('fail')
         expect(body.error.message).toBe('Please login to access this resource')

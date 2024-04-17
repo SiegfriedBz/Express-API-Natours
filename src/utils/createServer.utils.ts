@@ -1,10 +1,10 @@
 import config from 'config'
-import express from 'express'
+import express, { Express } from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import routes from '../routes'
 
-export default function createServer() {
+export default function createServer(): Express {
   const app = express()
 
   app.use(
