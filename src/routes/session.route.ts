@@ -10,10 +10,15 @@ const router = express.Router()
 
 router
   .route('/')
+  /** LOGIN */
   .post(validateRequest(createSessionZodSchema), createSessionHandler)
 
 // requireUser routes
 router.use(requireUser)
-router.route('/').delete(deleteSessionHandler)
+
+router
+  .route('/')
+  /** LOGOUT */
+  .delete(deleteSessionHandler)
 
 export default router
