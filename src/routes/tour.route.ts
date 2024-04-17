@@ -3,9 +3,17 @@ import requireUser from '../middleware/requireUser'
 import restrictTo from '../middleware/restrictTo'
 import validateRequest from '../middleware/validateRequest'
 import { createTourZodSchema } from '../zodSchema/tour.zodSchema'
-import { createTourHandler } from '../controllers/tour.controller'
+import {
+  getAllToursHandler,
+  createTourHandler
+} from '../controllers/tour.controller'
 
 const router = express.Router()
+
+router
+  .route('/')
+  /** GET ALL TOURS */
+  .get(getAllToursHandler)
 
 // Admin / Lead-Guide protected routes
 router.use(requireUser, restrictTo('admin', 'lead-guide'))
