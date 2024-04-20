@@ -2,28 +2,18 @@ import { omit } from 'lodash'
 import User from '../models/user.model'
 import AppError from '../utils/AppError.utils'
 import type { FilterQuery, UpdateQuery } from 'mongoose'
-import type { TCreateUserInput } from '../zodSchema/user.zodSchema'
-import type { IUserDBInput, IUserDocument } from '../types/user.types'
+import type {
+  TAdminUpdateUserInput,
+  TCreateUserInput,
+  TUpdateMeInput
+} from '../zodSchema/user.zodSchema'
+import type { IUserDocument } from '../types/user.types'
 
-type TReturnUserWithoutPassword = Promise<Omit<
-  IUserDocument,
-  'password'
-> | null>
+type TUserWithoutPassword = Omit<IUserDocument, 'password'>
 
-export async function getUser(userId: string): TReturnUserWithoutPassword {
-  const user = await User.findById(userId)
-
-  return user
-    ? (omit(user.toObject(), 'password') as unknown as Omit<
-        IUserDocument,
-        'password'
-      >)
-    : null
-}
-/** Signup */
 export async function createUser(
   inputData: TCreateUserInput['body']
-): TReturnUserWithoutPassword {
+): Promise<TUserWithoutPassword | null> {
   try {
     const newUser = await User.create(inputData)
 
@@ -42,11 +32,11 @@ export async function createUser(
   }
 }
 
-/** Admin Or User update user */
 export async function updateUser(
   filter: FilterQuery<IUserDocument>,
-  update: UpdateQuery<IUserDBInput>
-): TReturnUserWithoutPassword {
+  update: UpdateQuery<TAdminUpdateUserInput['body'] | TUpdateMeInput['body']>
+): Promise<TUserWithoutPassword | null> {
+  // TODO USE .select("-password")
   const updatedUser = await User.findOneAndUpdate(filter, update, { new: true })
 
   return updatedUser
@@ -57,15 +47,31 @@ export async function updateUser(
     : null
 }
 
-/** Check email/password and return user */
-type TReturnCheckPassword = Promise<IUserDocument | null>
+export async function getAllUsers(): Promise<TUserWithoutPassword[] | null> {
+  const users = await User.find().select('-password')
+
+  return users
+}
+
+export async function getUser(
+  userId: string
+): Promise<TUserWithoutPassword | null> {
+  const user = await User.findById(userId).select('-password')
+
+  return user
+}
+
+/** Helpers */
+// Check email/password and return user
+type TPropsCheckPassword = {
+  email: string
+  password: string
+}
+
 export async function checkPassword({
   email,
   password
-}: {
-  email: string
-  password: string
-}): TReturnCheckPassword {
+}: TPropsCheckPassword): Promise<IUserDocument | null> {
   const user = await User.findOne({ email })
 
   if (!user) {
