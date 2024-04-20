@@ -11,7 +11,7 @@ type TProps = {
 
 export const loginAs = async ({ asDocument, app }: TProps) => {
   const { headers } = await supertest(app)
-    .post('/api/sessions')
+    .post('/api/v1/sessions/login')
     .send({
       email: (asDocument as IUserDocument).email,
       password: CORRECT_PASSWORD
