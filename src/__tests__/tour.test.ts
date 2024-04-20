@@ -6,16 +6,18 @@ import createServer from '../utils/createServer.utils'
 import { handleMongoTestServer } from './utils.ts/handleMongoTestServer.utils'
 import { createUserAs } from './utils.ts/createUserAs.utils'
 import { loginAs } from './utils.ts/loginAs.utils'
+import { MAX_RESULTS_PER_PAGE } from '../utils/queryBuilder.utils'
+import logger from '../utils/logger.utils'
+import {
+  TOUR_DIFFICULTY,
+  type TCreateTourInput
+} from '../zodSchema/tour.zodSchema'
 import {
   createTourInput,
   EXTRAVAGANT_DISCOUNT
 } from './fixtures/tour/tour.fixture'
 import type { IUserDocument } from '../types/user.types'
 import type { ITourDocument } from '../types/tour.types'
-import {
-  TOUR_DIFFICULTY,
-  type TCreateTourInput
-} from '../zodSchema/tour.zodSchema'
 
 const app = createServer()
 
@@ -403,34 +405,181 @@ describe('Tour routes', () => {
   })
 
   describe('Get All tours route', () => {
-    it('should return 200 + tours array', async () => {
-      // 1. Clean DB - Delete all Tours
+    const totalNumOfTours = 12
+
+    beforeEach(async () => {
+      // Clean DB & Create Tours
       await Tour.deleteMany()
-
-      // 2. Create Tours
-      await Tour.create([
-        createTourInput(),
-        createTourInput(),
-        createTourInput()
-      ])
-
-      // 3. Get tours using route handler
-      const { body } = await supertest(app).get('/api/v1/tours').expect(200)
-
-      expect(body.data.tours.length).toBe(3)
-      expect(body).toEqual(
-        expect.objectContaining({
-          status: 'success',
-          data: expect.objectContaining({
-            tours: expect.arrayContaining([
-              expect.objectContaining({
-                name: expect.any(String),
-                duration: expect.any(Number)
-              })
-            ])
-          })
+      await Tour.create(
+        Array.from({ length: totalNumOfTours }, () => {
+          return createTourInput()
         })
       )
+    })
+
+    describe('Query string - Pagination', () => {
+      describe(`With total num of tours (${totalNumOfTours}) > MAX_RESULTS_PER_PAGE (${MAX_RESULTS_PER_PAGE})`, () => {
+        describe('With an empty query string', () => {
+          it(`should return 200 + tours array containing MAX_RESULTS_PER_PAGE tours`, async () => {
+            const { body } = await supertest(app)
+              .get('/api/v1/tours')
+              .expect(200)
+
+            expect(body.data.tours.length).toBe(MAX_RESULTS_PER_PAGE)
+            expect(body).toEqual(
+              expect.objectContaining({
+                status: 'success',
+                data: expect.objectContaining({
+                  tours: expect.arrayContaining([
+                    expect.objectContaining({
+                      name: expect.any(String),
+                      duration: expect.any(Number)
+                    })
+                  ])
+                })
+              })
+            )
+          })
+        })
+
+        describe('With ?limit=2 query string', () => {
+          it(`should return 200 + tours array containing2 tours`, async () => {
+            const { body } = await supertest(app)
+              .get('/api/v1/tours?limit=2')
+              .expect(200)
+
+            expect(body.data.tours.length).toBe(2)
+            expect(body).toEqual(
+              expect.objectContaining({
+                status: 'success',
+                data: expect.objectContaining({
+                  tours: expect.arrayContaining([
+                    expect.objectContaining({
+                      name: expect.any(String),
+                      duration: expect.any(Number)
+                    })
+                  ])
+                })
+              })
+            )
+          })
+        })
+
+        describe('With ?page=2 query string', () => {
+          it(`should return 200 + tours array containing ${totalNumOfTours - MAX_RESULTS_PER_PAGE} tours`, async () => {
+            const { body } = await supertest(app)
+              .get('/api/v1/tours?page=2')
+              .expect(200)
+
+            expect(body.data.tours.length).toBe(
+              totalNumOfTours - MAX_RESULTS_PER_PAGE
+            )
+            expect(body).toEqual(
+              expect.objectContaining({
+                status: 'success',
+                data: expect.objectContaining({
+                  tours: expect.arrayContaining([
+                    expect.objectContaining({
+                      name: expect.any(String),
+                      duration: expect.any(Number)
+                    })
+                  ])
+                })
+              })
+            )
+          })
+        })
+
+        describe('With ?page=3 query string', () => {
+          it(`should return 200 + tours array containing 0 tour`, async () => {
+            const { body } = await supertest(app)
+              .get('/api/v1/tours?page=3')
+              .expect(200)
+
+            expect(body.data.tours.length).toBe(0)
+            expect(body).toEqual(
+              expect.objectContaining({
+                status: 'success',
+                data: expect.objectContaining({
+                  tours: expect.any(Array)
+                })
+              })
+            )
+          })
+        })
+      })
+    })
+
+    describe('Query string - Filters - Project Fields', () => {
+      it(`should return 200 + tours array containing only selected fields`, async () => {
+        const { body } = await supertest(app)
+          .get('/api/v1/tours?fields=price,difficulty,duration')
+          .expect(200)
+
+        body.data.tours.forEach((tour: ITourDocument) => {
+          expect(tour?.name).toBeUndefined()
+        })
+
+        expect(body).toEqual(
+          expect.objectContaining({
+            status: 'success',
+            data: expect.objectContaining({
+              tours: expect.arrayContaining([
+                expect.objectContaining({
+                  _id: expect.any(String),
+                  price: expect.any(Number),
+                  difficulty: expect.any(String),
+                  duration: expect.any(Number)
+                })
+              ])
+            })
+          })
+        )
+      })
+    })
+
+    describe('Query string - Filters - LT GT Filters', () => {
+      it(`should return 200 + tours array matching LTE query`, async () => {
+        const { body } = await supertest(app)
+          .get('/api/v1/tours?duration[lte]=5')
+          .expect(200)
+
+        logger.info(body.data.tours)
+
+        body.data.tours.forEach((tour: ITourDocument) => {
+          expect(tour?.duration).toBeLessThanOrEqual(5)
+        })
+
+        expect(body).toEqual(
+          expect.objectContaining({
+            status: 'success',
+            data: expect.objectContaining({
+              tours: expect.any(Array)
+            })
+          })
+        )
+      })
+
+      it(`should return 200 + tours array matching GT query`, async () => {
+        const { body } = await supertest(app)
+          .get('/api/v1/tours?duration[gt]=5')
+          .expect(200)
+
+        logger.info(body.data.tours)
+
+        body.data.tours.forEach((tour: ITourDocument) => {
+          expect(tour?.duration).toBeGreaterThan(5)
+        })
+
+        expect(body).toEqual(
+          expect.objectContaining({
+            status: 'success',
+            data: expect.objectContaining({
+              tours: expect.any(Array)
+            })
+          })
+        )
+      })
     })
   })
 
@@ -627,7 +776,7 @@ describe('Tour routes', () => {
     })
   })
 
-  describe(`Get tours' stats route`, () => {
+  describe(`Get tours' Stats route`, () => {
     it('should return 200 + stats array', async () => {
       // Create Tours
       await Tour.create([
@@ -664,7 +813,7 @@ describe('Tour routes', () => {
     })
   })
 
-  describe(`Get tours' monthly stats route`, () => {
+  describe(`Get tours' Monthly Stats route`, () => {
     // Create Tours
     beforeEach(async () => {
       await Tour.create([

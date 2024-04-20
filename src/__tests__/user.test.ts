@@ -1,6 +1,7 @@
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import mongoose from 'mongoose'
 import supertest from 'supertest'
+import User from '../models/user.model'
 import createServer from '../utils/createServer.utils'
 import { handleMongoTestServer } from './utils.ts/handleMongoTestServer.utils'
 import { createUserAs } from './utils.ts/createUserAs.utils'
@@ -11,7 +12,6 @@ import {
   createUserAsInput
 } from './fixtures/user/userAsInput.fixture'
 import type { IUserDocument } from '../types/user.types'
-import User from '../models/user.model'
 
 const app = createServer()
 

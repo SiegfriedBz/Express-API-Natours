@@ -1,11 +1,13 @@
 import Tour from '../models/tour.model'
 import AppError from '../utils/AppError.utils'
 import type { FilterQuery, UpdateQuery } from 'mongoose'
+import { queryBuilderService } from '../utils/queryBuilder.service.utils'
 import type {
   TCreateTourInput,
   TUpdateTourInput
 } from '../zodSchema/tour.zodSchema'
 import type { ITourDocument } from '../types/tour.types'
+import type { Query as ExpressQuery } from 'express-serve-static-core'
 
 const EARTH_RADIUS = {
   mi: 3963.2,
@@ -16,11 +18,12 @@ const METER_TO = {
   km: 0.001
 }
 
-export async function getAllTours() {
-  const tours = await Tour.find()
+export async function getAllTours(query: ExpressQuery) {
+  const tours = await queryBuilderService<ITourDocument>({ query, Model: Tour })
 
   return tours
 }
+
 export async function getTour(tourId: string) {
   const tour = await Tour.findById(tourId)
 
@@ -49,7 +52,18 @@ export async function deleteTour(tourId: string) {
 }
 
 /** Stats */
-export async function getToursStats() {
+// Tours' stats
+type TStats = {
+  _id: string
+  avgRating: number
+  avgPrice: number
+  minPrice: number
+  maxPrice: number
+  totalRatingsCount: number
+  totalToursCount: number
+}[]
+
+export async function getToursStats(): Promise<TStats> {
   const stats = await Tour.aggregate([
     { $match: { ratingsAverage: { $gte: 4.5 } } },
     {
@@ -65,7 +79,6 @@ export async function getToursStats() {
     },
     {
       $sort: {
-        // using the keys returned by previous stage
         avgPrice: 1 // ASC ORDER
       }
     }
@@ -74,7 +87,14 @@ export async function getToursStats() {
   return stats
 }
 
-export async function getMonthlyStats(year: number) {
+// Tours' monthly stats
+type TMonthlyStats = {
+  month: number
+  toursStartcount: number
+  tours: string[]
+}[]
+
+export async function getMonthlyStats(year: number): Promise<TMonthlyStats> {
   const stats = await Tour.aggregate([
     { $unwind: '$startDates' },
     {
@@ -115,16 +135,19 @@ export async function getMonthlyStats(year: number) {
   ])
   return stats
 }
+
 /** Geo */
+type TGetToursWithinProps = {
+  distance: string
+  latlng: string
+  unit: string
+}
+
 export async function getToursWithin({
   distance,
   latlng,
   unit
-}: {
-  distance: string
-  latlng: string
-  unit: string
-}) {
+}: TGetToursWithinProps) {
   // radiant
   const radius = Number(distance) / EARTH_RADIUS[unit === 'mi' ? 'mi' : 'km']
 
@@ -139,7 +162,7 @@ export async function getToursWithin({
   const tours = await Tour.find({
     startLocation: {
       $geoWithin: {
-        $centerSphere: [[lng, lat], radius]
+        $centerSphere: [[Number(lng), Number(lat)], radius]
       }
     }
   })
@@ -147,13 +170,17 @@ export async function getToursWithin({
   return tours
 }
 
+// Get Distances to tours from a point
+type TGetDistancesProps = {
+  latlng: string
+  unit: string
+}
+type TDistances = { distance: number; name: string }[] | null
+
 export async function getDistances({
   latlng,
   unit
-}: {
-  latlng: string
-  unit: string
-}) {
+}: TGetDistancesProps): Promise<TDistances> {
   const [lat, lng] = latlng.split(',')
 
   if (!lat || !lng) {

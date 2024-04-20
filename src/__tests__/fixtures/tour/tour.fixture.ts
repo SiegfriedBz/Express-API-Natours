@@ -3,9 +3,11 @@ import type { TCreateTourInput } from '../../../zodSchema/tour.zodSchema'
 export const EXTRAVAGANT_DISCOUNT = 100000
 
 export const createTourInput = (): TCreateTourInput['body'] => {
+  const rdm = Math.random() * 100
+
   return {
     name: crypto.randomUUID().slice(0, 40), // unique
-    duration: 5,
+    duration: rdm < 50 ? 5 : 10,
     maxGroupSize: 25,
     difficulty: 'easy',
     price: 397,

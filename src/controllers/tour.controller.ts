@@ -16,6 +16,7 @@ import type {
   TCreateTourInput,
   TUpdateTourInput
 } from '../zodSchema/tour.zodSchema'
+import type { ITourDocument } from '../types/tour.types'
 
 export const getAllToursHandler = async (
   req: Request,
@@ -23,11 +24,13 @@ export const getAllToursHandler = async (
   next: NextFunction
 ) => {
   try {
-    const tours = await getAllTours()
+    const { query } = req
+
+    const tours: ITourDocument[] = await getAllTours(query)
 
     return res.status(200).json({
       status: 'success',
-      dataCount: tours.length,
+      dataCount: tours?.length,
       data: { tours }
     })
   } catch (err: unknown) {
@@ -46,7 +49,7 @@ export const getTourHandler = async (
       params: { tourId }
     } = req
 
-    const tour = await getTour(tourId)
+    const tour: ITourDocument | null = await getTour(tourId)
 
     if (!tour) {
       return next(new AppError({ statusCode: 404, message: 'Tour not found' }))
@@ -55,103 +58,6 @@ export const getTourHandler = async (
     return res.status(200).json({
       status: 'success',
       data: { tour }
-    })
-  } catch (err: unknown) {
-    logger.error(err)
-    next(err)
-  }
-}
-
-/** Stats */
-export const getToursStatsHandler = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const stats = await getToursStats()
-
-    res.status(200).json({
-      status: 'success',
-      data: {
-        stats
-      }
-    })
-  } catch (err: unknown) {
-    logger.error(err)
-    next(err)
-  }
-}
-
-export const getToursMonthlyStatsHandler = async (
-  req: Request<{ year: string }, object, object>,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const {
-      params: { year }
-    } = req
-
-    const stats = await getMonthlyStats(Number(year))
-
-    res.status(200).json({
-      status: 'success',
-      data: {
-        stats
-      }
-    })
-  } catch (err: unknown) {
-    logger.error(err)
-    next(err)
-  }
-}
-
-/** Geo */
-export const getToursWithinHandler = async (
-  req: Request<
-    { distance: string; latlng: string; unit: string },
-    object,
-    object
-  >,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const {
-      params: { distance, latlng, unit }
-    } = req
-
-    const tours = await getToursWithin({ distance, latlng, unit })
-
-    return res.status(200).json({
-      status: 'success',
-      data: {
-        tours
-      }
-    })
-  } catch (err: unknown) {
-    logger.error(err)
-    next(err)
-  }
-}
-export const getDistancesHandler = async (
-  req: Request<{ latlng: string; unit: string }, object, object>,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const {
-      params: { latlng, unit }
-    } = req
-
-    const distances = await getDistances({ latlng, unit })
-
-    return res.status(200).json({
-      status: 'success',
-      data: {
-        distances
-      }
     })
   } catch (err: unknown) {
     logger.error(err)
@@ -262,6 +168,104 @@ export const deleteTourHandler = async (
     }
 
     return res.status(204).send()
+  } catch (err: unknown) {
+    logger.error(err)
+    next(err)
+  }
+}
+
+/** Stats */
+export const getToursStatsHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const stats = await getToursStats()
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        stats
+      }
+    })
+  } catch (err: unknown) {
+    logger.error(err)
+    next(err)
+  }
+}
+
+export const getToursMonthlyStatsHandler = async (
+  req: Request<{ year: string }, object, object>,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const {
+      params: { year }
+    } = req
+
+    const stats = await getMonthlyStats(Number(year))
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        stats
+      }
+    })
+  } catch (err: unknown) {
+    logger.error(err)
+    next(err)
+  }
+}
+
+/** Geo */
+export const getToursWithinHandler = async (
+  req: Request<
+    { distance: string; latlng: string; unit: string },
+    object,
+    object
+  >,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const {
+      params: { distance, latlng, unit }
+    } = req
+
+    const tours = await getToursWithin({ distance, latlng, unit })
+
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        tours
+      }
+    })
+  } catch (err: unknown) {
+    logger.error(err)
+    next(err)
+  }
+}
+
+export const getDistancesHandler = async (
+  req: Request<{ latlng: string; unit: string }, object, object>,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const {
+      params: { latlng, unit }
+    } = req
+
+    const distances = await getDistances({ latlng, unit })
+
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        distances
+      }
+    })
   } catch (err: unknown) {
     logger.error(err)
     next(err)
