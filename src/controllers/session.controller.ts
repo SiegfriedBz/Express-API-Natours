@@ -12,7 +12,7 @@ import type { NextFunction, Request, Response } from 'express'
 import type { TCreateSessionInput } from '../zodSchema/session.zodSchema'
 import type { IUserDocument } from '../types/user.types'
 
-/** Login */
+/** LOGIN */
 export const createSessionHandler = async (
   req: Request<object, object, TCreateSessionInput['body']>,
   res: Response,
@@ -61,16 +61,25 @@ export const createSessionHandler = async (
     })
 
     // 4. Set cookies
-    res.cookie('accessToken', accessToken, setTokenCookieOptions('accessToken'))
+    res.cookie(
+      'accessToken',
+      accessToken,
+      setTokenCookieOptions()
+      // 'accessToken'
+    )
     res.cookie(
       'refreshToken',
       refreshToken,
-      setTokenCookieOptions('refreshToken')
+      setTokenCookieOptions()
+      // 'refreshToken'
     )
 
     // 5. Send access + refresh tokens
     res.status(200).json({
-      status: 'success'
+      status: 'success',
+      data: {
+        user: userWithoutPassword
+      }
     })
   } catch (err: unknown) {
     logger.error(err)
@@ -91,8 +100,8 @@ export const deleteSessionHandler = async (
     await updateSession({ _id: sessionId }, { isValid: false })
 
     // kill tokens
-    res.cookie('accessToken', null)
-    res.cookie('refreshToken', null)
+    res.cookie('accessToken', '')
+    res.cookie('refreshToken', '')
 
     return res.status(200).json({
       status: 'success'

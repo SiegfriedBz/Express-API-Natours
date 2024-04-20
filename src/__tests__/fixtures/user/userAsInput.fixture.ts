@@ -1,7 +1,10 @@
-import type { TCreateUserInput } from '../../../zodSchema/user.zodSchema'
+import type {
+  TCreateUserInput,
+  USER_ROLES
+} from '../../../zodSchema/user.zodSchema'
 
-type TRole = {
-  as: 'user' | 'admin' | 'lead-guide'
+export type TRole = {
+  as: (typeof USER_ROLES)[number]
 }
 
 export const CORRECT_PASSWORD = '123456'

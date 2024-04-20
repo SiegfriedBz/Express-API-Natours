@@ -13,5 +13,6 @@ const createSessionZodSchema = z.object({
   })
 })
 
+type TCreateSessionInput = z.TypeOf<typeof createSessionZodSchema>
 export { createSessionZodSchema }
-export type TCreateSessionInput = z.TypeOf<typeof createSessionZodSchema>
+export type { TCreateSessionInput }

@@ -11,6 +11,7 @@ import {
   createUserAsInput
 } from './fixtures/user/userAsInput.fixture'
 import type { IUserDocument } from '../types/user.types'
+import User from '../models/user.model'
 
 const app = createServer()
 
@@ -39,7 +40,7 @@ describe('User routes', () => {
       it('should return 201 + user', async () => {
         // Create user
         const { body } = await supertest(app)
-          .post('/api/users')
+          .post('/api/v1/users/signup')
           .send(userInput)
           .expect(201)
 
@@ -61,7 +62,7 @@ describe('User routes', () => {
       it('should return 400 + correct error message', async () => {
         // Create user
         const { body } = await supertest(app)
-          .post('/api/users')
+          .post('/api/v1/users/signup')
           .send({
             ...userInput,
             passwordConfirmation: 'WRONG_PSWD'
@@ -84,7 +85,7 @@ describe('User routes', () => {
 
         // Create user
         const { body } = await supertest(app)
-          .post('/api/users')
+          .post('/api/v1/users/signup')
           .send(invalidUserInput)
           .expect(400)
 
@@ -93,99 +94,46 @@ describe('User routes', () => {
     })
   })
 
-  describe('Admin - Update user route', () => {
-    let admin: IUserDocument | null = null
+  describe('User - GetMe route', () => {
     let user: IUserDocument | null = null
 
-    // Create user & admin by using service
+    // Create user by using service
     beforeEach(async () => {
       user = await createUserAs({ as: 'user' })
-      admin = await createUserAs({ as: 'admin' })
     })
 
-    describe('When Admin logged in', () => {
-      let adminAccessTokenCookie: string = ''
+    describe('When user is logged in', () => {
+      let userAccessTokenCookie: string = ''
 
+      // Login as User
       beforeEach(async () => {
-        // Login as Admin
-        const { accessTokenCookie } = await loginAs({
-          asDocument: admin as IUserDocument,
-          app
-        })
-        adminAccessTokenCookie = accessTokenCookie
-      })
-
-      describe('When userId is valid', () => {
-        it('should send a 200 + updated user', async () => {
-          // Update user as Admin
-          const newName = `name-${crypto.randomUUID()}`
-          const updateUserData = {
-            ...user,
-            name: newName,
-            role: 'lead-guide'
-          }
-
-          const { body: updateRespBody } = await supertest(app)
-            .put(`/api/users/${(user as IUserDocument)._id}`)
-            .set('Cookie', adminAccessTokenCookie)
-            .send(updateUserData)
-            .expect(200)
-
-          expect(updateRespBody.status).toBe('success')
-          expect(updateRespBody.data.user.name).toBe(newName)
-          expect(updateRespBody.data.user.role).toBe('lead-guide')
-        })
-      })
-
-      describe('When userId does NOT exist', () => {
-        it('should send a 404 + correct error message', async () => {
-          // Update user as Admin
-          const updateUserData = {
-            ...user,
-            name: 'NEW_NAME',
-            role: 'lead-guide'
-          }
-
-          const unexistingUserId = new mongoose.Types.ObjectId().toString()
-
-          const { body: updateRespBody } = await supertest(app)
-            .put(`/api/users/${unexistingUserId}`)
-            .set('Cookie', adminAccessTokenCookie)
-            .send(updateUserData)
-            .expect(404)
-
-          expect(updateRespBody.status).toBe('fail')
-          expect(updateRespBody.error.message).toBe('User not found')
-        })
-      })
-    })
-
-    describe('When Admin is NOT logged in & User is logged in ', () => {
-      it('should send a 403 + correct error message', async () => {
-        // Login as User
         const { accessTokenCookie } = await loginAs({
           asDocument: user as IUserDocument,
           app
         })
-        const userAccessTokenCookie = accessTokenCookie
+        userAccessTokenCookie = accessTokenCookie
+      })
 
-        // Update user as user
-        const updateUserData = {
-          ...user,
-          name: 'NEW_NAME',
-          role: 'lead-guide'
-        }
-
-        const { body: updateRespBody } = await supertest(app)
-          .put(`/api/users/${(user as IUserDocument)._id}`)
+      it('should send a 200 + user', async () => {
+        const { body } = await supertest(app)
+          .get('/api/v1/users/me')
           .set('Cookie', userAccessTokenCookie)
-          .send(updateUserData)
-          .expect(403)
+          .expect(200)
 
-        expect(updateRespBody.status).toBe('fail')
-        expect(updateRespBody.error.message).toBe(
-          "Unauthorized - You don't have permissions. Access restricted to admin."
-        )
+        expect(body.status).toBe('success')
+        expect(body.data.user._id).toBe(user?._id.toString())
+        expect(body.data.user.name).toBe((user as IUserDocument).name)
+      })
+    })
+
+    describe('When user is NOT logged in', () => {
+      it('should send a 401 + correct error message', async () => {
+        const { body } = await supertest(app)
+          .get('/api/v1/users/me')
+          .expect(401)
+
+        expect(body.status).toBe('fail')
+        expect(body.error.message).toBe('Please login to access this resource')
       })
     })
   })
@@ -217,12 +165,11 @@ describe('User routes', () => {
       it('should send a 200 + updated user + NEW Access & Refresh Tokens', async () => {
         const newName = `name-${crypto.randomUUID()}`
         const updateUserData = {
-          ...user,
           name: newName
         }
 
         const { body, headers } = await supertest(app)
-          .put('/api/users/update-me')
+          .patch('/api/v1/users/update-me')
           .set('Cookie', userAccessTokenCookieInit)
           .send(updateUserData)
           .expect(200)
@@ -241,12 +188,11 @@ describe('User routes', () => {
       it('should send a 401 + correct error message', async () => {
         const newName = `name-${crypto.randomUUID()}`
         const updateUserData = {
-          ...user,
           name: newName
         }
 
         const { body } = await supertest(app)
-          .put('/api/users/update-me')
+          .patch('/api/v1/users/update-me')
           .send(updateUserData)
           .expect(401)
 
@@ -285,7 +231,7 @@ describe('User routes', () => {
           }
 
           const { body, headers } = await supertest(app)
-            .patch('/api/users/update-my-password')
+            .patch('/api/v1/users/update-my-password')
             .set('Cookie', userAccessTokenCookieInit)
             .send(updatePasswordData)
             .expect(200)
@@ -300,7 +246,7 @@ describe('User routes', () => {
 
           // Check user can login with new password
           const { body: newBody } = await supertest(app)
-            .post('/api/sessions')
+            .post('/api/v1/sessions/login')
             .send({
               email: (user as IUserDocument).email,
               password: 'NEW_PASSWORD'
@@ -320,7 +266,7 @@ describe('User routes', () => {
           }
 
           const { body } = await supertest(app)
-            .patch('/api/users/update-my-password')
+            .patch('/api/v1/users/update-my-password')
             .set('Cookie', userAccessTokenCookieInit)
             .send(invalidUpdatePasswordData)
             .expect(401)
@@ -340,12 +286,254 @@ describe('User routes', () => {
         }
 
         const { body } = await supertest(app)
-          .patch('/api/users/update-my-password')
+          .patch('/api/v1/users/update-my-password')
           .send(updatePasswordData)
           .expect(401)
 
         expect(body.status).toBe('fail')
         expect(body.error.message).toBe('Please login to access this resource')
+      })
+    })
+  })
+
+  describe('Admin - Update user route', () => {
+    let admin: IUserDocument | null = null
+    let user: IUserDocument | null = null
+
+    // Create user & admin by using service
+    beforeEach(async () => {
+      user = await createUserAs({ as: 'user' })
+      admin = await createUserAs({ as: 'admin' })
+    })
+
+    describe('When Admin logged in', () => {
+      let adminAccessTokenCookie: string = ''
+
+      beforeEach(async () => {
+        // Login as Admin
+        const { accessTokenCookie } = await loginAs({
+          asDocument: admin as IUserDocument,
+          app
+        })
+        adminAccessTokenCookie = accessTokenCookie
+      })
+
+      describe('When userId is valid', () => {
+        it('should send a 200 + updated user', async () => {
+          // Update user as Admin
+          const newName = `name-${crypto.randomUUID()}`
+          const updateUserData = {
+            name: newName,
+            role: 'lead-guide'
+          }
+
+          const { body: updateRespBody } = await supertest(app)
+            .patch(`/api/v1/users/${user?._id}`)
+            .set('Cookie', adminAccessTokenCookie)
+            .send(updateUserData)
+            .expect(200)
+
+          expect(updateRespBody.status).toBe('success')
+          expect(updateRespBody.data.user.name).toBe(newName)
+          expect(updateRespBody.data.user.role).toBe('lead-guide')
+        })
+      })
+
+      describe('When userId does NOT exist', () => {
+        it('should send a 404 + correct error message', async () => {
+          // Update user as Admin
+          const updateUserData = {
+            name: 'NEW_NAME',
+            role: 'lead-guide'
+          }
+
+          const fakeUserId = new mongoose.Types.ObjectId().toString()
+
+          const { body: updateRespBody } = await supertest(app)
+            .patch(`/api/v1/users/${fakeUserId}`)
+            .set('Cookie', adminAccessTokenCookie)
+            .send(updateUserData)
+            .expect(404)
+
+          expect(updateRespBody.status).toBe('fail')
+          expect(updateRespBody.error.message).toBe('User not found')
+        })
+      })
+    })
+
+    describe('When Admin is NOT logged in & User is logged in ', () => {
+      it('should send a 403 + correct error message', async () => {
+        // Login as User
+        const { accessTokenCookie } = await loginAs({
+          asDocument: user as IUserDocument,
+          app
+        })
+        const userAccessTokenCookie = accessTokenCookie
+
+        // Update user as user
+        const updateUserData = {
+          name: 'NEW_NAME',
+          role: 'lead-guide'
+        }
+
+        const { body: updateRespBody } = await supertest(app)
+          .patch(`/api/v1/users/${user?._id}`)
+          .set('Cookie', userAccessTokenCookie)
+          .send(updateUserData)
+          .expect(403)
+
+        expect(updateRespBody.status).toBe('fail')
+        expect(updateRespBody.error.message).toBe(
+          "Unauthorized - You don't have permissions. Access restricted to admin."
+        )
+      })
+    })
+  })
+
+  describe('Admin - Get 1 User route', () => {
+    let admin: IUserDocument | null = null
+    let user: IUserDocument | null = null
+
+    // Create user & admin by using service
+    beforeEach(async () => {
+      user = await createUserAs({ as: 'user' })
+      admin = await createUserAs({ as: 'admin' })
+    })
+
+    describe('When Admin logged in', () => {
+      let adminAccessTokenCookie: string = ''
+
+      beforeEach(async () => {
+        // Login as Admin
+        const { accessTokenCookie } = await loginAs({
+          asDocument: admin as IUserDocument,
+          app
+        })
+        adminAccessTokenCookie = accessTokenCookie
+      })
+
+      describe('When userId is valid', () => {
+        it('should send a 200 + user', async () => {
+          const { body } = await supertest(app)
+            .get(`/api/v1/users/${user?._id}`)
+            .set('Cookie', adminAccessTokenCookie)
+            .expect(200)
+
+          expect(body.status).toBe('success')
+          expect(body.data.user.name).toBe(user?.name)
+          expect(body.data.user._id).toBe(user?._id.toString())
+        })
+      })
+
+      describe('When userId does NOT exist', () => {
+        it('should send a 404 + correct error message', async () => {
+          const fakeUserId = new mongoose.Types.ObjectId().toString()
+
+          const { body: updateRespBody } = await supertest(app)
+            .get(`/api/v1/users/${fakeUserId}`)
+            .set('Cookie', adminAccessTokenCookie)
+            .expect(404)
+
+          expect(updateRespBody.status).toBe('fail')
+          expect(updateRespBody.error.message).toBe('User not found')
+        })
+      })
+    })
+
+    describe('When Admin is NOT logged in & User is logged in ', () => {
+      it('should send a 403 + correct error message', async () => {
+        // Login as User
+        const { accessTokenCookie } = await loginAs({
+          asDocument: user as IUserDocument,
+          app
+        })
+        const userAccessTokenCookie = accessTokenCookie
+
+        const { body: updateRespBody } = await supertest(app)
+          .get(`/api/v1/users/${user?._id}`)
+          .set('Cookie', userAccessTokenCookie)
+          .expect(403)
+
+        expect(updateRespBody.status).toBe('fail')
+        expect(updateRespBody.error.message).toBe(
+          "Unauthorized - You don't have permissions. Access restricted to admin."
+        )
+      })
+    })
+  })
+
+  describe('Admin - Get All Users route', () => {
+    let admin: IUserDocument | null = null
+    let user01: IUserDocument | null = null
+    let user02: IUserDocument | null = null
+
+    beforeEach(async () => {
+      // Clean up DB
+      await User.deleteMany()
+
+      // Create users & admin by using service
+      admin = await createUserAs({ as: 'admin' })
+      user01 = await createUserAs({ as: 'user' })
+      user02 = await createUserAs({ as: 'user' })
+    })
+
+    describe('When Admin logged in', () => {
+      let adminAccessTokenCookie: string = ''
+
+      beforeEach(async () => {
+        // Login as Admin
+        const { accessTokenCookie } = await loginAs({
+          asDocument: admin as IUserDocument,
+          app
+        })
+        adminAccessTokenCookie = accessTokenCookie
+      })
+
+      it('should send a 200 + array of users', async () => {
+        const { body } = await supertest(app)
+          .get(`/api/v1/users/`)
+          .set('Cookie', adminAccessTokenCookie)
+          .expect(200)
+
+        expect(body).toEqual(
+          expect.objectContaining({
+            status: 'success',
+            dataCount: 3,
+            data: expect.objectContaining({
+              users: expect.arrayContaining([
+                expect.objectContaining({
+                  name: user01?.name,
+                  _id: user01?._id?.toString()
+                }),
+                expect.objectContaining({
+                  name: user02?.name,
+                  _id: user02?._id?.toString()
+                })
+              ])
+            })
+          })
+        )
+      })
+    })
+
+    describe('When Admin is NOT logged in & User is logged in ', () => {
+      it('should send a 403 + correct error message', async () => {
+        // Login as User01
+        const { accessTokenCookie } = await loginAs({
+          asDocument: user01 as IUserDocument,
+          app
+        })
+        const userAccessTokenCookie = accessTokenCookie
+
+        const { body: updateRespBody } = await supertest(app)
+          .get(`/api/v1/users`)
+          .set('Cookie', userAccessTokenCookie)
+          .expect(403)
+
+        expect(updateRespBody.status).toBe('fail')
+        expect(updateRespBody.error.message).toBe(
+          "Unauthorized - You don't have permissions. Access restricted to admin."
+        )
       })
     })
   })

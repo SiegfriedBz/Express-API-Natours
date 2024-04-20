@@ -6,19 +6,16 @@ import {
 import validateRequest from '../middleware/validateRequest'
 import { createSessionZodSchema } from '../zodSchema/session.zodSchema'
 import requireUser from '../middleware/requireUser'
+
 const router = express.Router()
 
 router
-  .route('/')
-  /** LOGIN */
+  .route('/login')
   .post(validateRequest(createSessionZodSchema), createSessionHandler)
 
 // requireUser routes
 router.use(requireUser)
 
-router
-  .route('/')
-  /** LOGOUT */
-  .delete(deleteSessionHandler)
+router.route('/logout').delete(deleteSessionHandler)
 
 export default router

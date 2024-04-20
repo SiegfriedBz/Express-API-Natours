@@ -1,7 +1,14 @@
-import AppError from '../utils/AppError.utils'
 import { ZodError } from 'zod'
+import { MongoError } from 'mongodb'
+import AppError from '../utils/AppError.utils'
+import logger from '../utils/logger.utils'
 import type { NextFunction, Request, Response } from 'express'
 
+const isTest = process.env.NODE_ENV === 'test'
+
+/**
+ * Express middleware for handling errors.
+ */
 export default function errorMiddleware(
   err: unknown,
   req: Request,
@@ -11,19 +18,26 @@ export default function errorMiddleware(
 ) {
   let error = err
 
+  !isTest && logger.error(error)
+
   // Zod ValidateRequest thrown error(s)
   if (error instanceof ZodError) {
     const errorMessage = []
     for (const issue of error.issues) {
-      errorMessage.push(issue.message)
+      const { message, path } = issue
+      if (message.startsWith('Expected')) {
+        errorMessage.push(`${message} on ${path?.join(', ')}`)
+      } else {
+        errorMessage.push(message)
+      }
     }
     if (errorMessage.length > 0) {
       error = handleZodError(errorMessage.join(', '))
     }
   }
 
-  // Mongo thrown error on DUP KEY
-  if (error instanceof AppError && error.code === 11000) {
+  // MongoDB thrown error on DUP KEY
+  if (error instanceof MongoError && error.code === 11000) {
     if (
       typeof error === 'object' &&
       error != null &&
@@ -36,8 +50,8 @@ export default function errorMiddleware(
     }
   }
 
-  // Mongo thrown error on INVALID DB ID
-  if ((error as AppError) && AppError.name === 'CastError') {
+  // Mongoose thrown error on INVALID ID
+  if (error instanceof Error && error.name === 'CastError') {
     if (
       typeof error === 'object' &&
       error !== null &&
@@ -63,7 +77,6 @@ export default function errorMiddleware(
 }
 
 /** Helpers */
-//
 const handleZodError = (message: string) => {
   const error = new AppError({ statusCode: 400, message })
 

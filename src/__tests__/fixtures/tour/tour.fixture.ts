@@ -1,5 +1,7 @@
 import type { TCreateTourInput } from '../../../zodSchema/tour.zodSchema'
 
+export const EXTRAVAGANT_DISCOUNT = 100000
+
 export const createTourInput = (): TCreateTourInput['body'] => {
   return {
     name: crypto.randomUUID().slice(0, 40), // unique
