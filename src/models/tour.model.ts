@@ -79,10 +79,6 @@ const tourSchema = new mongoose.Schema(
       type: [Date] // accept timestamps in ms || "2024-03-10" => Mongo will try to parse it into a Date
     },
     slug: String,
-    secretTour: {
-      type: Boolean,
-      default: false
-    },
     startLocation: {
       // GeoJSON
       type: {
@@ -118,5 +114,7 @@ const tourSchema = new mongoose.Schema(
     timestamps: true
   }
 )
+
+tourSchema.index({ startLocation: '2dsphere' })
 
 export default mongoose.model<ITourDocument>('Tour', tourSchema)
