@@ -1,25 +1,18 @@
 import z from 'zod'
 
-const ROLES = ['admin', 'lead-guide', 'guide', 'user'] as const
-
-const bodyBase = {
-  name: z.string({
-    required_error: 'Name is required'
-  }),
-  photo: z.string({}).optional()
-}
+export const USER_ROLES = ['admin', 'lead-guide', 'guide', 'user'] as const
 
 const params = {
-  params: z.object({
-    userId: z.string()
-  })
+  userId: z.string()
 }
 
 // User - Signup
 const createUserZodSchema = z.object({
   body: z
     .object({
-      ...bodyBase,
+      name: z.string({
+        required_error: 'Name is required'
+      }),
       email: z
         .string({
           required_error: 'Email is required'
@@ -39,21 +32,28 @@ const createUserZodSchema = z.object({
       path: ['passwordConfirmation']
     })
 })
-type TCreateUserInput = z.TypeOf<typeof createUserZodSchema>
 
 // User - Update self (except password)
 const updateMeZodSchema = z.object({
-  body: z.object({
-    ...bodyBase,
-    email: z
-      .string({
-        required_error: 'Email is required'
-      })
-      .email('Not a valid email')
-  })
+  body: z
+    .object({
+      name: z.string().optional(),
+      email: z.string().email().optional(),
+      photo: z.string().optional()
+    })
+    .refine((data) => !data?.name || data.name != null, {
+      message: 'User name can not be null',
+      path: ['name']
+    })
+    .refine((data) => !data?.email || data.email != null, {
+      message: 'User email can not be null',
+      path: ['email']
+    })
+    .refine((data) => !data?.photo || data.photo != null, {
+      message: 'User photo can not be null',
+      path: ['photo']
+    })
 })
-
-type TUpdateMeInput = z.TypeOf<typeof updateMeZodSchema>
 
 // User - Update password
 const updateMyPasswordZodSchema = z.object({
@@ -79,17 +79,29 @@ const updateMyPasswordZodSchema = z.object({
     })
 })
 
-type TUpdateMyPasswordInput = z.TypeOf<typeof updateMyPasswordZodSchema>
-
 // Admin - update user
 const adminUpdateUserZodSchema = z.object({
-  body: z.object({
-    ...bodyBase,
-    role: z.enum(ROLES, { required_error: 'Role is required' })
+  params: z.object({
+    ...params
   }),
-  ...params
+  body: z
+    .object({
+      name: z.string().optional(),
+      role: z.enum(USER_ROLES).optional()
+    })
+    .refine((data) => !data?.name || data.name != null, {
+      message: 'User name can not be null',
+      path: ['name']
+    })
+    .refine((data) => !data?.role || USER_ROLES.includes(data.role), {
+      message: `User role must be chosen between ${USER_ROLES.join(', ')}`,
+      path: ['role']
+    })
 })
 
+type TCreateUserInput = z.TypeOf<typeof createUserZodSchema>
+type TUpdateMeInput = z.TypeOf<typeof updateMeZodSchema>
+type TUpdateMyPasswordInput = z.TypeOf<typeof updateMyPasswordZodSchema>
 type TAdminUpdateUserInput = z.TypeOf<typeof adminUpdateUserZodSchema>
 
 export {
