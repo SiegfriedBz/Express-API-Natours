@@ -28,7 +28,7 @@ describe('Session routes', () => {
       it('should return 200 + cookies: valid accessToken + valid refreshToken', async () => {
         /** LOGIN USER */
         const { body, headers } = await supertest(app)
-          .post('/api/sessions')
+          .post('/api/v1/sessions/login')
           .send({
             email: (user as IUserDocument).email,
             password: CORRECT_PASSWORD
@@ -59,7 +59,7 @@ describe('Session routes', () => {
       it('should return 401 + correct error message + undefined cookies', async () => {
         // Login user
         const { body, headers } = await supertest(app)
-          .post('/api/sessions')
+          .post('/api/v1/sessions/login')
           .send({
             email: (user as IUserDocument).email,
             password: 'WRONG_PASSWORD'
@@ -97,7 +97,7 @@ describe('Session routes', () => {
       it('should log out the user and nullify its cookies', async () => {
         // logout user
         const { body, headers } = await supertest(app)
-          .delete('/api/sessions')
+          .delete('/api/v1/sessions/logout')
           .set('Cookie', userAccessTokenCookie as string)
           .expect(200)
 
@@ -125,7 +125,7 @@ describe('Session routes', () => {
       it('should return a 401 + correct eroor message', async () => {
         // logout user
         const { body } = await supertest(app)
-          .delete('/api/sessions')
+          .delete('/api/v1/sessions/logout')
           .expect(401)
 
         expect(body.status).toBe('fail')

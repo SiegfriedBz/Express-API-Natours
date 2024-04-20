@@ -9,13 +9,13 @@ import type { IUserDocument } from '../types/user.types'
 
 type TReturnSession = Promise<ISessionDocument | null>
 
-async function getSession(sessionId: Types.ObjectId): TReturnSession {
+async function getSession(sessionId: string): TReturnSession {
   const session = await Session.findById(sessionId).lean()
 
   return session
 }
 
-export async function createSession(userId: Types.ObjectId): TReturnSession {
+export async function createSession(userId: string): TReturnSession {
   const newSession = await Session.create({ user: userId })
 
   return newSession
