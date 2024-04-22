@@ -27,7 +27,7 @@ import { tourMulterUploadFields } from '../utils/multer.upload.tour.utils'
 const router = express.Router()
 
 /** REVIEWS on 1 TOUR */
-router.use(reviewRoutes)
+router.use('/:id/reviews', reviewRoutes)
 
 /** re-route */
 router.route('/top-5-cheap').get(reRoute, getAllToursHandler) // TODO ADD TESTS
