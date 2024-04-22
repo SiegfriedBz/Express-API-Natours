@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { FilterQuery, Query } from 'mongoose'
 import { Query as ExpressQuery } from 'express-serve-static-core'
-import logger from './logger.utils'
 
 export const MAX_RESULTS_PER_PAGE = 10
 
@@ -64,8 +63,6 @@ class QueryBuilder<T> {
         }
       }
     }
-
-    logger.info({ mongooseFilterQuery })
 
     this.mongooseQuery = this.mongooseQuery.find(mongooseFilterQuery)
 
