@@ -88,10 +88,8 @@ const createTourZodSchema = z.object({
     })
     .refine(
       (data) =>
-        !(data?.discount && !data?.price) &&
-        data?.discount &&
-        data?.price &&
-        data.discount < data.price,
+        !data?.discount ||
+        (data?.discount && data?.price && data.discount < data.price),
       {
         message: `If a discount is provided, a price must also be provided and the discount must be less than the price`,
         path: ['discount']
@@ -115,9 +113,8 @@ const updateTourZodSchema = z.object({
     })
     .refine(
       (data) =>
-        !(data?.discount && !data?.price) &&
-        (!data?.discount ||
-          (data?.discount && data?.price && data?.discount < data?.price)),
+        !data?.discount ||
+        (data?.discount && data?.price && data.discount < data.price),
       {
         message: `If a discount is provided, a price must also be provided and the discount must be less than the price`,
         path: ['discount']
