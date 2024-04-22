@@ -128,9 +128,6 @@ describe('Reviews routes', () => {
               tourId: tour?._id
             })
 
-            console.log('======')
-            console.log({ reviewInputData })
-
             // Create review on tour as User
             const { body } = await supertest(app)
               .post(`/api/v1/tours/${tour?._id}/reviews`)
