@@ -1,0 +1,154 @@
+[
+  {
+    "_id": "5c8a1d5b0190b214360dc057",
+    "name": "Chuba Ka",
+    "email": "admin@example.com",
+    "role": "admin",
+    "photo": "user-1.jpg",
+    "password": "123456"
+  },
+  {
+    "_id": "5c8a21f22f8fb814b56fa18a",
+    "name": "Aarav Lynn",
+    "email": "lead-guide@example.com",
+    "role": "lead-guide",
+    "photo": "user-11.jpg",
+    "password": "123456"
+  },
+  {
+    "_id": "5c8a22c62f8fb814b56fa18b",
+    "name": "Miyah Myles",
+    "email": "miyah@example.com",
+    "role": "lead-guide",
+    "photo": "user-12.jpg",
+    "password": "123456"
+  },
+  {
+    "_id": "5c8a1f292f8fb814b56fa184",
+    "name": "Leo Gillespie",
+    "email": "guide@example.com",
+    "role": "guide",
+    "photo": "user-5.jpg",
+    "password": "123456"
+  },
+  {
+    "_id": "5c8a1f4e2f8fb814b56fa185",
+    "name": "Jennifer Hardy",
+    "email": "jennifer@example.com",
+    "role": "guide",
+    "photo": "user-6.jpg",
+    "password": "123456"
+  },
+  {
+    "_id": "5c8a201e2f8fb814b56fa186",
+    "name": "Kate Morrison",
+    "email": "kate@example.com",
+    "role": "guide",
+    "photo": "user-7.jpg",
+    "password": "123456"
+  },
+  {
+    "_id": "5c8a23412f8fb814b56fa18c",
+    "name": "Ben Hadley",
+    "email": "ben@example.com",
+    "role": "guide",
+    "photo": "user-13.jpg",
+    "password": "123456"
+  },
+  {
+    "_id": "5c8a1dfa2f8fb814b56fa181",
+    "name": "user-01",
+    "email": "user-01@example.com",
+    "role": "user",
+    "photo": "user-2.jpg",
+    "password": "123456"
+  },
+  {
+    "_id": "5c8a1e1a2f8fb814b56fa182",
+    "name": "Sophie Louise Hart",
+    "email": "sophie@example.com",
+    "role": "user",
+    "photo": "user-3.jpg",
+    "password": "123456"
+  },
+  {
+    "_id": "5c8a1ec62f8fb814b56fa183",
+    "name": "Ayla Cornell",
+    "email": "ayls@example.com",
+    "role": "user",
+    "photo": "user-4.jpg",
+    "password": "123456"
+  },
+  {
+    "_id": "5c8a23c82f8fb814b56fa18d",
+    "name": "Laura Wilson",
+    "email": "laura@example.com",
+    "role": "user",
+    "photo": "user-14.jpg",
+    "password": "123456"
+  },
+  {
+    "_id": "5c8a23de2f8fb814b56fa18e",
+    "name": "Max Smith",
+    "email": "max@example.com",
+    "role": "user",
+    "photo": "user-15.jpg",
+    "password": "123456"
+  },
+  {
+    "_id": "5c8a24282f8fb814b56fa18f",
+    "name": "Isabel Kirkland",
+    "email": "isabel@example.com",
+    "role": "user",
+    "photo": "user-16.jpg",
+    "password": "123456"
+  },
+  {
+    "_id": "5c8a24402f8fb814b56fa190",
+    "name": "Alexander Jones",
+    "email": "alex@example.com",
+    "role": "user",
+    "photo": "user-17.jpg",
+    "password": "123456"
+  },
+  {
+    "_id": "5c8a245f2f8fb814b56fa191",
+    "name": "Eduardo Hernandez",
+    "email": "edu@example.com",
+    "role": "user",
+    "photo": "user-18.jpg",
+    "password": "123456"
+  },
+  {
+    "_id": "5c8a24822f8fb814b56fa192",
+    "name": "John Riley",
+    "email": "john@example.com",
+    "role": "user",
+    "photo": "user-19.jpg",
+    "password": "123456"
+  },
+  {
+    "_id": "5c8a24a02f8fb814b56fa193",
+    "name": "Lisa Brown",
+    "email": "lisa@example.com",
+    "role": "user",
+    "photo": "user-20.jpg",
+    "password": "123456"
+  },
+  {
+    "_id": "5c8a20d32f8fb814b56fa187",
+    "name": "Eliana Stout",
+    "email": "eliana@example.com",
+    "role": "user",
+    "photo": "user-8.jpg",
+    "password": "123456"
+  },
+  {
+    "_id": "5c8a211f2f8fb814b56fa188",
+    "name": "Cristian Vega",
+    "email": "chris@example.com",
+    "role": "user",
+    "photo": "user-9.jpg",
+    "password": "123456"
+  }
+]
