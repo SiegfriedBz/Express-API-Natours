@@ -1,8 +1,8 @@
 import type { TCreateTourInput } from '../../../zodSchema/tour.zodSchema'
 
-export const EXTRAVAGANT_DISCOUNT = 100000
+export const EXTRAVAGANT_DISCOUNT = 10000
 
-export const createTourInput = (): TCreateTourInput['body'] => {
+export const generateTourInput = (): TCreateTourInput['body'] => {
   const rdm = Math.random() * 100
 
   return {

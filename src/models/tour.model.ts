@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import { TOUR_DIFFICULTY } from '../zodSchema/tour.zodSchema'
 import type { ITourDocument } from '../types/tour.types'
 
 const tourSchema = new mongoose.Schema(
@@ -23,9 +24,8 @@ const tourSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Tour difficulty is required'],
       enum: {
-        values: ['easy', 'medium', 'difficult'],
-        message:
-          'Tour difficulty is required, and must be "easy", "medium", or "difficult"'
+        values: TOUR_DIFFICULTY,
+        message: `Tour difficulty is required, and must be chosen between ${TOUR_DIFFICULTY.join(', ')}`
       }
     },
     ratingsAverage: {
@@ -50,7 +50,7 @@ const tourSchema = new mongoose.Schema(
           const tourObject = (this as ITourDocument).toObject()
           return val < tourObject.price
         },
-        message: 'Tour discount ({VALUE}) must be less than its price'
+        message: 'Tour discount must be less than the price'
       }
     },
     summary: {
@@ -70,11 +70,11 @@ const tourSchema = new mongoose.Schema(
     images: {
       type: [String]
     },
-    createdAt: {
-      type: Date,
-      default: Date.now(),
-      select: false
-    },
+    // createdAt: {
+    //   type: Date,
+    //   default: Date.now(),
+    //   select: false
+    // },
     startDates: {
       type: [Date] // accept timestamps in ms || "2024-03-10" => Mongo will try to parse it into a Date
     },

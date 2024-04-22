@@ -1,7 +1,8 @@
 import config from 'config'
 import mongoose from 'mongoose'
 import bcrypt from 'bcrypt'
-import { IUserDocument } from '../types/user.types'
+import { USER_ROLES } from '../zodSchema/user.zodSchema'
+import type { IUserDocument } from '../types/user.types'
 
 const userSchema = new mongoose.Schema(
   {
@@ -12,8 +13,8 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       enum: {
-        values: ['admin', 'lead-guide', 'guide', 'user'],
-        message: "A role must be 'admin', 'lead-guide', 'guide' or 'user'"
+        values: USER_ROLES,
+        message: `User role must be chosen between ${USER_ROLES.join(', ')}`
       },
       default: 'user'
     }

@@ -1,14 +1,14 @@
 import User from '../../models/user.model'
 import {
-  createUserAsInput,
+  generateUserAsInput,
   type TRole
-} from '../fixtures/user/userAsInput.fixture'
+} from '../fixtures/user/generateUserAsInput.fixture'
 import type { IUserDocument } from '../../types/user.types'
 
 type TProps = TRole
 
 export const createUserAs = async ({ as }: TProps): Promise<IUserDocument> => {
-  const result = await User.create(createUserAsInput({ as }))
+  const result = await User.create(generateUserAsInput({ as }))
 
   return result.toObject()
 }

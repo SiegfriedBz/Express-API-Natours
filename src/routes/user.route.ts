@@ -10,7 +10,7 @@ import {
 } from '../controllers/user.controller'
 import validateRequest from '../middleware/validateRequest'
 import requireUser from '../middleware/requireUser'
-import restrictTo from '../middleware/restrictTo'
+import restrictToRole from '../middleware/restrictToRole'
 import multerUpload from '../middleware/multerUpload'
 import resizeImages from '../middleware/resizeImages'
 import { userMulterUploadFields } from '../utils/multer.upload.user.utils'
@@ -45,7 +45,7 @@ router
   .patch(validateRequest(updateMyPasswordZodSchema), updateMyPasswordHandler)
 
 /** Admin-protected routes */
-router.use(restrictTo('admin'))
+router.use(restrictToRole('admin'))
 router
   .route('/:userId')
   .get(getUserHandler)
