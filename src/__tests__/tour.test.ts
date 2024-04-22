@@ -6,16 +6,14 @@ import createServer from '../utils/createServer.utils'
 import { handleMongoTestServer } from './utils.ts/handleMongoTestServer.utils'
 import { createUserAs } from './utils.ts/createUserAs.utils'
 import { loginAs } from './utils.ts/loginAs.utils'
+import { createTour } from './utils.ts/createTour.utils'
 import { MAX_RESULTS_PER_PAGE } from '../utils/queryBuilder.utils'
 import logger from '../utils/logger.utils'
+import { TOUR_DIFFICULTY } from '../zodSchema/tour.zodSchema'
 import {
-  TOUR_DIFFICULTY,
-  type TCreateTourInput
-} from '../zodSchema/tour.zodSchema'
-import {
-  createTourInput,
+  generateTourInput,
   EXTRAVAGANT_DISCOUNT
-} from './fixtures/tour/tour.fixture'
+} from './fixtures/tour/generateTourInput.fixture'
 import type { IUserDocument } from '../types/user.types'
 import type { ITourDocument } from '../types/tour.types'
 
@@ -33,9 +31,9 @@ describe('Tour routes', () => {
       let adminAccessTokenCookie: string = ''
 
       beforeEach(async () => {
-        // Create Admin using Service
+        // Create Admin
         admin = await createUserAs({ as: 'admin' })
-        // Login as Admin using route handler
+        // Login as Admin
         const { accessTokenCookie } = await loginAs({
           asDocument: admin as IUserDocument,
           app
@@ -46,7 +44,7 @@ describe('Tour routes', () => {
 
       describe('With a valid input', () => {
         it('should return 201 + new tour', async () => {
-          const tourInput = createTourInput()
+          const tourInput = generateTourInput()
 
           const { body } = await supertest(app)
             .post('/api/v1/tours')
@@ -73,7 +71,7 @@ describe('Tour routes', () => {
 
       describe('With a INVALID input', () => {
         it('should return 400 + correct error message', async () => {
-          const invalidTourInput = { ...createTourInput() }
+          const invalidTourInput = { ...generateTourInput() }
           invalidTourInput.discount = EXTRAVAGANT_DISCOUNT
 
           const { body } = await supertest(app)
@@ -96,9 +94,9 @@ describe('Tour routes', () => {
       let leadGuideAccessTokenCookie: string = ''
 
       beforeEach(async () => {
-        // Create leadGuide using Service
+        // Create leadGuide
         leadGuide = await createUserAs({ as: 'lead-guide' })
-        // Login as Lead-Guide using route handler
+        // Login as Lead-Guide
         const { accessTokenCookie } = await loginAs({
           asDocument: leadGuide as IUserDocument,
           app
@@ -109,7 +107,7 @@ describe('Tour routes', () => {
 
       describe('With a valid input', () => {
         it('should return 201 + new tour', async () => {
-          const tourInput = createTourInput()
+          const tourInput = generateTourInput()
 
           const { body } = await supertest(app)
             .post('/api/v1/tours')
@@ -136,7 +134,7 @@ describe('Tour routes', () => {
 
       describe('With a INVALID input', () => {
         it('should return 400 + correct error message', async () => {
-          const invalidTourInput = { ...createTourInput() }
+          const invalidTourInput = { ...generateTourInput() }
           invalidTourInput.discount = EXTRAVAGANT_DISCOUNT
 
           const { body } = await supertest(app)
@@ -155,7 +153,7 @@ describe('Tour routes', () => {
 
     describe('When user is NOT logged in', () => {
       it('should return 401 + correct error message', async () => {
-        const tourInput = createTourInput()
+        const tourInput = generateTourInput()
 
         const { body } = await supertest(app)
           .post('/api/v1/tours')
@@ -169,9 +167,9 @@ describe('Tour routes', () => {
 
     describe('When a User is logged in', () => {
       it('should return 403 + correct error message', async () => {
-        // Create User using Service
+        // Create User
         const user: IUserDocument = await createUserAs({ as: 'user' })
-        // Login as User using route handler
+        // Login as User
         const { accessTokenCookie } = await loginAs({
           asDocument: user as IUserDocument,
           app
@@ -180,7 +178,7 @@ describe('Tour routes', () => {
         const userAccessTokenCookie = accessTokenCookie
 
         // Create tour as User
-        const tourInput = createTourInput()
+        const tourInput = generateTourInput()
         const { body } = await supertest(app)
           .post('/api/v1/tours')
           .set('Cookie', userAccessTokenCookie)
@@ -196,15 +194,12 @@ describe('Tour routes', () => {
   })
 
   describe('Update tour route', () => {
-    let tourInput: TCreateTourInput['body'] | null = null
     let tour: ITourDocument | null = null
 
     beforeEach(async () => {
       // Clean DB + Create Tour
       await Tour.deleteMany()
-      tourInput = createTourInput()
-      tour = await Tour.create(tourInput)
-      tour = tour.toObject()
+      tour = await createTour()
     })
 
     describe('When Admin is logged in', () => {
@@ -213,9 +208,9 @@ describe('Tour routes', () => {
       let adminAccessTokenCookie: string = ''
 
       beforeEach(async () => {
-        // Create Admin using Service
+        // Create Admin
         admin = await createUserAs({ as: 'admin' })
-        // Login as Admin using route handler
+        // Login as Admin
         const { accessTokenCookie } = await loginAs({
           asDocument: admin as IUserDocument,
           app
@@ -285,9 +280,9 @@ describe('Tour routes', () => {
       let leadGuideAccessTokenCookie: string = ''
 
       beforeEach(async () => {
-        // Create Lead-Guide using Service
+        // Create Lead-Guide
         leadGuide = await createUserAs({ as: 'lead-guide' })
-        // Login as Lead-Guide using route handler
+        // Login as Lead-Guide
         const { accessTokenCookie } = await loginAs({
           asDocument: leadGuide as IUserDocument,
           app
@@ -374,9 +369,9 @@ describe('Tour routes', () => {
       let userAccessTokenCookie: string = ''
 
       beforeEach(async () => {
-        // Create User using Service
+        // Create User
         user = await createUserAs({ as: 'user' })
-        // Login as User using route handler
+        // Login as User
         const { accessTokenCookie } = await loginAs({
           asDocument: user as IUserDocument,
           app
@@ -410,9 +405,9 @@ describe('Tour routes', () => {
     beforeEach(async () => {
       // Clean DB & Create Tours
       await Tour.deleteMany()
-      await Tour.create(
+      await Promise.all(
         Array.from({ length: totalNumOfTours }, () => {
-          return createTourInput()
+          return createTour()
         })
       )
     })
@@ -588,12 +583,10 @@ describe('Tour routes', () => {
       it('should return 200 + correct tour', async () => {
         // 1. Clean DB - Delete all Tours
         await Tour.deleteMany()
-
         // 2. Create Tour
-        const tourInput = createTourInput()
-        const newTour = await Tour.create(tourInput)
+        const newTour = await createTour()
 
-        // 3. Get tour using route handler
+        // 3. Get tour
         const { body } = await supertest(app)
           .get(`/api/v1/tours/${newTour._id}`)
           .expect(200)
@@ -618,9 +611,9 @@ describe('Tour routes', () => {
         await Tour.deleteMany()
 
         // 2. Create Tour
-        await Tour.create(createTourInput())
+        await createTour()
 
-        // 3. Get tour using route handler
+        // 3. Get tour
         const fakeTourId = new mongoose.Types.ObjectId().toString()
         const { body } = await supertest(app)
           .get(`/api/v1/tours/${fakeTourId}`)
@@ -638,8 +631,7 @@ describe('Tour routes', () => {
     beforeEach(async () => {
       // Clean DB & Create Tour
       await Tour.deleteMany()
-      const tourInput = createTourInput()
-      newTour = await Tour.create(tourInput)
+      newTour = await createTour()
     })
 
     describe('When Admin is logged in', () => {
@@ -648,9 +640,9 @@ describe('Tour routes', () => {
       let adminAccessTokenCookie: string = ''
 
       beforeEach(async () => {
-        // Create Admin using Service
+        // Create Admin
         admin = await createUserAs({ as: 'admin' })
-        // Login as Admin using route handler
+        // Login as Admin
         const { accessTokenCookie } = await loginAs({
           asDocument: admin as IUserDocument,
           app
@@ -661,7 +653,7 @@ describe('Tour routes', () => {
 
       describe('With a valid tour id', () => {
         it('should return 204', async () => {
-          // Delete tour using route handler
+          // Delete tour
           await supertest(app)
             .delete(`/api/v1/tours/${(newTour as ITourDocument)._id}`)
             .set('Cookie', adminAccessTokenCookie)
@@ -672,7 +664,7 @@ describe('Tour routes', () => {
       describe('With a unexisting tour id', () => {
         it('should return 400 + correct error message', async () => {
           const fakeTourId = new mongoose.Types.ObjectId().toString()
-          // Delete tour using route handler
+          // Delete tour
           const { body } = await supertest(app)
             .delete(`/api/v1/tours/${fakeTourId}`)
             .set('Cookie', adminAccessTokenCookie)
@@ -690,9 +682,9 @@ describe('Tour routes', () => {
       let leadGuideAccessTokenCookie: string = ''
 
       beforeEach(async () => {
-        // Create Lead-Guide using Service
+        // Create Lead-Guide
         leadGuide = await createUserAs({ as: 'lead-guide' })
-        // Login as Lead-Guide using route handler
+        // Login as Lead-Guide
         const { accessTokenCookie } = await loginAs({
           asDocument: leadGuide as IUserDocument,
           app
@@ -703,7 +695,7 @@ describe('Tour routes', () => {
 
       describe('With a valid tour id', () => {
         it('should return 204', async () => {
-          // Delete tour using route handler
+          // Delete tour
           await supertest(app)
             .delete(`/api/v1/tours/${(newTour as ITourDocument)._id}`)
             .set('Cookie', leadGuideAccessTokenCookie)
@@ -714,7 +706,7 @@ describe('Tour routes', () => {
       describe('With a unexisting tour id', () => {
         it('should return 400 + correct error message', async () => {
           const fakeTourId = new mongoose.Types.ObjectId().toString()
-          // Delete tour using route handler
+          // Delete tour
           const { body } = await supertest(app)
             .delete(`/api/v1/tours/${fakeTourId}`)
             .set('Cookie', leadGuideAccessTokenCookie)
@@ -732,9 +724,9 @@ describe('Tour routes', () => {
       let userAccessTokenCookie: string = ''
 
       beforeEach(async () => {
-        // Create User using Service
+        // Create User
         user = await createUserAs({ as: 'user' })
-        // Login as User using route handler
+        // Login as User
         const { accessTokenCookie } = await loginAs({
           asDocument: user as IUserDocument,
           app
@@ -745,7 +737,7 @@ describe('Tour routes', () => {
 
       describe('With a valid tour id', () => {
         it('should return 403 + correct error message', async () => {
-          // Delete tour using route handler
+          // Delete tour
           const { body } = await supertest(app)
             .delete(`/api/v1/tours/${(newTour as ITourDocument)._id}`)
             .set('Cookie', userAccessTokenCookie)
@@ -762,7 +754,7 @@ describe('Tour routes', () => {
     describe('When NO User is logged in', () => {
       describe('With a valid tour id', () => {
         it('should return 401 + correct error message', async () => {
-          // Delete tour using route handler
+          // Delete tour
           const { body } = await supertest(app)
             .delete(`/api/v1/tours/${(newTour as ITourDocument)._id}`)
             .expect(401)
@@ -780,9 +772,9 @@ describe('Tour routes', () => {
     it('should return 200 + stats array', async () => {
       // Create Tours
       await Tour.create([
-        createTourInput(),
-        createTourInput(),
-        createTourInput()
+        generateTourInput(),
+        generateTourInput(),
+        generateTourInput()
       ])
 
       // Get Stats
@@ -817,9 +809,9 @@ describe('Tour routes', () => {
     // Create Tours
     beforeEach(async () => {
       await Tour.create([
-        createTourInput(),
-        createTourInput(),
-        createTourInput()
+        generateTourInput(),
+        generateTourInput(),
+        generateTourInput()
       ])
     })
 
@@ -829,9 +821,9 @@ describe('Tour routes', () => {
       let adminAccessTokenCookie: string = ''
 
       beforeEach(async () => {
-        // Create Admin using Service
+        // Create Admin
         admin = await createUserAs({ as: 'admin' })
-        // Login as Admin using route handler
+        // Login as Admin
         const { accessTokenCookie } = await loginAs({
           asDocument: admin as IUserDocument,
           app
@@ -869,9 +861,9 @@ describe('Tour routes', () => {
       let leadGuideAccessTokenCookie: string = ''
 
       beforeEach(async () => {
-        // Create Lead-Guide using Service
+        // Create Lead-Guide
         leadGuide = await createUserAs({ as: 'lead-guide' })
-        // Login as Lead-Guide using route handler
+        // Login as Lead-Guide
         const { accessTokenCookie } = await loginAs({
           asDocument: leadGuide as IUserDocument,
           app
@@ -909,9 +901,9 @@ describe('Tour routes', () => {
       let guideAccessTokenCookie: string = ''
 
       beforeEach(async () => {
-        // Create Guide using Service
+        // Create Guide
         guide = await createUserAs({ as: 'guide' })
-        // Login as Guide using route handler
+        // Login as Guide
         const { accessTokenCookie } = await loginAs({
           asDocument: guide as IUserDocument,
           app
@@ -949,9 +941,9 @@ describe('Tour routes', () => {
       let userAccessTokenCookie: string = ''
 
       beforeEach(async () => {
-        // Create User using Service
+        // Create User
         user = await createUserAs({ as: 'user' })
-        // Login as User using route handler
+        // Login as User
         const { accessTokenCookie } = await loginAs({
           asDocument: user as IUserDocument,
           app
@@ -989,9 +981,9 @@ describe('Tour routes', () => {
     it('should return 200 + tours array', async () => {
       // Create Tours
       await Tour.create([
-        createTourInput(),
-        createTourInput(),
-        createTourInput()
+        generateTourInput(),
+        generateTourInput(),
+        generateTourInput()
       ])
 
       // Get Tours
@@ -1036,9 +1028,9 @@ describe('Tour routes', () => {
     it('should return 200 + distances array', async () => {
       // Create Tours
       await Tour.create([
-        createTourInput(),
-        createTourInput(),
-        createTourInput()
+        generateTourInput(),
+        generateTourInput(),
+        generateTourInput()
       ])
 
       // Get Distances

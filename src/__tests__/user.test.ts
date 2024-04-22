@@ -9,8 +9,8 @@ import { loginAs } from './utils.ts/loginAs.utils'
 import { getTokensFrom } from './utils.ts/getTokensFrom.utils'
 import {
   CORRECT_PASSWORD,
-  createUserAsInput
-} from './fixtures/user/userAsInput.fixture'
+  generateUserAsInput
+} from './fixtures/user/generateUserAsInput.fixture'
 import type { IUserDocument } from '../types/user.types'
 
 const app = createServer()
@@ -28,7 +28,7 @@ describe('User routes', () => {
   }
 
   beforeEach(() => {
-    const { name, email, password } = createUserAsInput({ as: 'user' })
+    const { name, email, password } = generateUserAsInput({ as: 'user' })
     userInput.name = name
     userInput.email = email
     userInput.password = password

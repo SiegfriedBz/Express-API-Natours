@@ -6,7 +6,7 @@ import { createUserAs } from './utils.ts/createUserAs.utils'
 import { loginAs } from './utils.ts/loginAs.utils'
 import { verifyJWT } from '../utils/jwt.utils'
 import { getTokensFrom } from './utils.ts/getTokensFrom.utils'
-import { CORRECT_PASSWORD } from './fixtures/user/userAsInput.fixture'
+import { CORRECT_PASSWORD } from './fixtures/user/generateUserAsInput.fixture'
 import type { IUserDocument } from '../types/user.types'
 import type { IDecodedToken } from '../types/tokens.types'
 
