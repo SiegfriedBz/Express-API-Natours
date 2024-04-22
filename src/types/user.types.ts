@@ -6,7 +6,7 @@ export interface IUserDBInput {
   name: string
   email: string
   password: string
-  photo: string
+  photo?: string
   role: TUserRole
 }
 export interface IUserDocument extends IUserDBInput, mongoose.Document {
