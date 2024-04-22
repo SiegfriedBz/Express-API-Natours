@@ -86,8 +86,8 @@ const tourSchema = new mongoose.Schema(
         default: 'Point',
         enum: ['Point']
       },
-      coordinates: [Number], // /!\ long, lat
-      description: String
+      coordinates: { type: [Number], default: [115, 8.64] }, // /!\ long, lat
+      description: { type: String, default: 'description' }
     },
     locations: [
       // GeoJSON
@@ -97,9 +97,9 @@ const tourSchema = new mongoose.Schema(
           default: 'Point',
           enum: ['Point']
         },
-        coordinates: [Number], // /!\ long, lat
-        description: String,
-        day: Number
+        coordinates: { type: [Number], default: [115, 8.64] }, // /!\ long, lat
+        description: { type: String, default: 'description' },
+        day: { type: Number, default: 1 }
       }
     ],
     // CHILD Referencing

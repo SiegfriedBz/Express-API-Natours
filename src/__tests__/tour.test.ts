@@ -69,6 +69,34 @@ describe('Tour routes', () => {
         })
       })
 
+      describe('With a valid input WITHOUT discount', () => {
+        it('should return 201 + new tour without discount', async () => {
+          const tourInputWithoutDiscount = generateTourInput()
+          delete tourInputWithoutDiscount.discount
+
+          const { body } = await supertest(app)
+            .post('/api/v1/tours')
+            .set('Cookie', adminAccessTokenCookie)
+            .send(tourInputWithoutDiscount)
+            .expect(201)
+
+          expect(body.data.tour.discount).toBeUndefined()
+          expect(body).toEqual(
+            expect.objectContaining({
+              status: 'success',
+              data: expect.objectContaining({
+                tour: expect.objectContaining({
+                  name: tourInputWithoutDiscount.name,
+                  description: tourInputWithoutDiscount.description,
+                  price: tourInputWithoutDiscount.price,
+                  guides: expect.arrayContaining([expect.any(String)])
+                })
+              })
+            })
+          )
+        })
+      })
+
       describe('With a INVALID input', () => {
         it('should return 400 + correct error message', async () => {
           const invalidTourInput = { ...generateTourInput() }
@@ -254,7 +282,107 @@ describe('Tour routes', () => {
         })
       })
 
-      describe('With a INVALID input', () => {
+      describe('With a tour without discount updated to have a discount', () => {
+        let tourWithoutDiscount: ITourDocument | null = null
+        let tourWithoutDiscountPrice: number | null = null
+        let validDiscount: number | null = null
+        let inValidDiscount: number | null = null
+
+        beforeEach(async () => {
+          const tourInputWithoutDiscount = generateTourInput()
+          delete tourInputWithoutDiscount.discount
+
+          tourWithoutDiscount = await Tour.create(tourInputWithoutDiscount)
+          tourWithoutDiscountPrice = tourWithoutDiscount!.price
+          validDiscount = tourWithoutDiscount!.price - 1
+          inValidDiscount = tourWithoutDiscount!.price + 1
+        })
+
+        describe('With a valid discount ( < price )', () => {
+          describe('When price + discount are given', () => {
+            it('should return 200 + updated tour with discount', async () => {
+              const tourUpdateInput = {
+                price: tourWithoutDiscountPrice,
+                discount: validDiscount
+              }
+
+              const { body } = await supertest(app)
+                .patch(
+                  `/api/v1/tours/${(tourWithoutDiscount as ITourDocument)._id}`
+                )
+                .set('Cookie', adminAccessTokenCookie)
+                .send(tourUpdateInput)
+                .expect(200)
+
+              expect(body).toEqual(
+                expect.objectContaining({
+                  status: 'success',
+                  data: expect.objectContaining({
+                    tour: expect.objectContaining({
+                      name: tourWithoutDiscount?.name,
+                      description: tourWithoutDiscount?.description,
+                      price: tourUpdateInput.price,
+                      discount: tourUpdateInput.discount,
+                      startDates: tourWithoutDiscount?.startDates.map((date) =>
+                        date.toISOString()
+                      ),
+                      summary: tourWithoutDiscount?.summary,
+                      guides: expect.arrayContaining([expect.any(String)])
+                    })
+                  })
+                })
+              )
+            })
+          })
+
+          describe('When only discount is given', () => {
+            it('should return 400 + correct error message', async () => {
+              const invalidTourUpdateInput = {
+                discount: validDiscount
+              }
+
+              const { body } = await supertest(app)
+                .patch(
+                  `/api/v1/tours/${(tourWithoutDiscount as ITourDocument)._id}`
+                )
+                .set('Cookie', adminAccessTokenCookie)
+                .send(invalidTourUpdateInput)
+                .expect(400)
+
+              expect(body.status).toBe('fail')
+              expect(body.error.message).toBe(
+                'If a discount is provided, a price must also be provided and the discount must be less than the price'
+              )
+            })
+          })
+        })
+
+        describe('With a INVALID discount ( > price )', () => {
+          describe('When price + discount are given', () => {
+            it('should return 400 + correct error message', async () => {
+              const invalidTourUpdateInput = {
+                price: tourWithoutDiscountPrice,
+                discount: inValidDiscount
+              }
+
+              const { body } = await supertest(app)
+                .patch(
+                  `/api/v1/tours/${(tourWithoutDiscount as ITourDocument)._id}`
+                )
+                .set('Cookie', adminAccessTokenCookie)
+                .send(invalidTourUpdateInput)
+                .expect(400)
+
+              expect(body.status).toBe('fail')
+              expect(body.error.message).toBe(
+                'If a discount is provided, a price must also be provided and the discount must be less than the price'
+              )
+            })
+          })
+        })
+      })
+
+      describe('With a INVALID duration ( null )', () => {
         it('should return 400 + correct error message', async () => {
           const invalidTourUpdateInput = {
             duration: null
@@ -575,6 +703,43 @@ describe('Tour routes', () => {
           })
         )
       })
+    })
+  })
+
+  describe('Get Top 5 cheap route', () => {
+    const totalNumOfTours = 12
+
+    beforeEach(async () => {
+      // Clean DB & Create Tours
+      await Tour.deleteMany()
+      await Promise.all(
+        Array.from({ length: totalNumOfTours }, () => {
+          return createTour()
+        })
+      )
+    })
+
+    it(`should return 200 + tours array of 5 tours`, async () => {
+      const { body } = await supertest(app)
+        .get('/api/v1/tours/top-5-cheap')
+        .expect(200)
+
+      expect(body).toEqual(
+        expect.objectContaining({
+          status: 'success',
+          dataCount: 5,
+          data: expect.objectContaining({
+            tours: expect.arrayContaining([
+              expect.objectContaining({
+                _id: expect.any(String),
+                price: expect.any(Number),
+                difficulty: expect.any(String),
+                duration: expect.any(Number)
+              })
+            ])
+          })
+        })
+      )
     })
   })
 
