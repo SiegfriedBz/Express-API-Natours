@@ -1,7 +1,7 @@
 import supertest from 'supertest'
 import { Express } from 'express'
 import { getTokensFrom } from './getTokensFrom.utils'
-import { CORRECT_PASSWORD } from '../fixtures/user/userAsInput.fixture'
+import { CORRECT_PASSWORD } from '../fixtures/user/generateUserAsInput.fixture'
 import type { IUserDocument } from '../../types/user.types'
 
 type TProps = {

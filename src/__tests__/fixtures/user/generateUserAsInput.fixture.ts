@@ -12,7 +12,7 @@ export const CORRECT_PASSWORD = '123456'
 /** Generate a valid input to create a 'user' | 'admin' | 'lead-guide'
  *  (using Admin privileges to set the role)
  */
-export const createUserAsInput = ({
+export const generateUserAsInput = ({
   as
 }: TRole): TCreateUserInput['body'] & {
   role: TRole['as']

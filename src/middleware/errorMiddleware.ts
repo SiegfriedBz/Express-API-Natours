@@ -1,10 +1,7 @@
 import { ZodError } from 'zod'
 import { MongoError } from 'mongodb'
 import AppError from '../utils/AppError.utils'
-import logger from '../utils/logger.utils'
 import type { NextFunction, Request, Response } from 'express'
-
-const isTest = process.env.NODE_ENV === 'test'
 
 /**
  * Express middleware for handling errors.
@@ -17,8 +14,6 @@ export default function errorMiddleware(
   next: NextFunction
 ) {
   let error = err
-
-  !isTest && logger.error(error)
 
   // Zod ValidateRequest thrown error(s)
   if (error instanceof ZodError) {
