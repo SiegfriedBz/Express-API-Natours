@@ -1,5 +1,6 @@
 import express from 'express'
 import reviewRoutes from './review.route'
+import bookingRoutes from './booking.route'
 import reRoute from '../middleware/reRoute'
 import requireUser from '../middleware/requireUser'
 import restrictToRole from '../middleware/restrictToRole'
@@ -28,6 +29,8 @@ const router = express.Router()
 
 /** REVIEWS on 1 TOUR */
 router.use('/:id/reviews', reviewRoutes)
+/** BOOKINGS on 1 TOUR */
+router.use('/:id/bookings', bookingRoutes)
 
 /** re-route */
 router.route('/top-5-cheap').get(reRoute, getAllToursHandler)
