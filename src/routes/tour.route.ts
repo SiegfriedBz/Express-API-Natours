@@ -1,7 +1,8 @@
 import express from 'express'
+import reviewRoutes from './review.route'
 import reRoute from '../middleware/reRoute'
 import requireUser from '../middleware/requireUser'
-import restrictTo from '../middleware/restrictTo'
+import restrictToRole from '../middleware/restrictToRole'
 import validateRequest from '../middleware/validateRequest'
 import multerUpload from '../middleware/multerUpload'
 import castToNumberAfterUpload from '../middleware/castToNumberAfterUpload'
@@ -25,6 +26,9 @@ import { tourMulterUploadFields } from '../utils/multer.upload.tour.utils'
 
 const router = express.Router()
 
+/** REVIEWS on 1 TOUR */
+router.use(reviewRoutes)
+
 /** re-route */
 router.route('/top-5-cheap').get(reRoute, getAllToursHandler) // TODO ADD TESTS
 
@@ -35,7 +39,7 @@ router
   .route('/monthly-stats/:year')
   .get(
     requireUser,
-    restrictTo('admin', 'lead-guide', 'guide'),
+    restrictToRole('admin', 'lead-guide', 'guide'),
     getToursMonthlyStatsHandler
   )
 
@@ -56,7 +60,7 @@ router
   .get(getAllToursHandler)
 
 /** Admin / Lead-Guide protected routes */
-router.use(requireUser, restrictTo('admin', 'lead-guide'))
+router.use(requireUser, restrictToRole('admin', 'lead-guide'))
 router
   .route('/')
   /** CREATE TOUR */
