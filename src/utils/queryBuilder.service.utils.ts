@@ -1,10 +1,10 @@
 import mongoose from 'mongoose'
 import QueryBuilder from './queryBuilder.utils'
 import type { Query as ExpressQuery } from 'express-serve-static-core'
-import type { TReviewFindFilterOptions } from '../controllers/review.controller'
+import type { TQueryFilterByTourId } from '../middleware/setQueryFilterByTourId'
 
 type TProps<T> = {
-  modelFindFilterOptions?: TReviewFindFilterOptions
+  queryFilterByTourId?: TQueryFilterByTourId
   query: ExpressQuery
   Model: mongoose.Model<T, object, object, T>
 }
@@ -15,18 +15,18 @@ type TProps<T> = {
  * @returns {Promise<T[]>} - The result of the executed query.
  */
 export async function queryBuilderService<T>({
-  modelFindFilterOptions,
+  queryFilterByTourId = {},
   query,
   Model
 }: TProps<T>): Promise<T[]> {
   /** Get filter options if any
    * e.g. GET /tours/:id/reviews => all reviews for 1 tour
+   * e.g. GET /tours/:id/bookings => all bookings for 1 tour
    */
-  const findFilterOptions = modelFindFilterOptions ?? {}
 
   /** Create QueryBuilder instance */
   const queryBuilder = new QueryBuilder({
-    mongooseQuery: Model.find(findFilterOptions),
+    mongooseQuery: Model.find(queryFilterByTourId),
     expressQueryObjInit: query
   })
 

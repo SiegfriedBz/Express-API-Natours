@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from 'express'
 import { getTour } from '../services/tour.service'
 import AppError from '../utils/AppError.utils'
 import logger from '../utils/logger.utils'
+import type { Request, Response, NextFunction } from 'express'
 import type { TCreateReviewInput } from '../zodSchema/review.zodSchema'
 import type { ITourDocument } from '../types/tour.types'
 

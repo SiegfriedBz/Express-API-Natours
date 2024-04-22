@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import slugify from 'slugify'
 import { TOUR_DIFFICULTY } from '../zodSchema/tour.zodSchema'
 import type { ITourDocument } from '../types/tour.types'
 
@@ -116,5 +117,11 @@ const tourSchema = new mongoose.Schema(
 )
 
 tourSchema.index({ startLocation: '2dsphere' })
+
+// Document pre Middleware/Hook - this : current Document instance
+tourSchema.pre('save', function (next) {
+  this.slug = slugify(this.name.toLowerCase(), '_')
+  next()
+})
 
 export default mongoose.model<ITourDocument>('Tour', tourSchema)

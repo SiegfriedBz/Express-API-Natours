@@ -1,6 +1,6 @@
 import express from 'express'
 import requireUser from '../middleware/requireUser'
-import setReviewFindFilterOptions from '../middleware/setReviewFindFilterOptions'
+import setQueryFilterByTourId from '../middleware/setQueryFilterByTourId'
 import restrictToRole from '../middleware/restrictToRole'
 import preValidateAndPresetCreateReview from '../middleware/preValidateAndPresetCreateReview'
 import preValidateUpdateReview from '../middleware/preValidateUpdateReview'
@@ -25,7 +25,7 @@ router
    * GET /api/v1/reviews
    * GET /api/v1/tours/:id/reviews
    */
-  .get('/', setReviewFindFilterOptions, getAllReviewsHandler)
+  .get('/', setQueryFilterByTourId, getAllReviewsHandler)
 
 router
   /** Handle

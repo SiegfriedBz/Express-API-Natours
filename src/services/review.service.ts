@@ -3,28 +3,29 @@ import { queryBuilderService } from '../utils/queryBuilder.service.utils'
 import type { FilterQuery, UpdateQuery } from 'mongoose'
 import type { Query as ExpressQuery } from 'express-serve-static-core'
 import type { IReviewDocument } from '../types/review.types'
-import type { TReviewFindFilterOptions } from '../controllers/review.controller'
 import type {
   TCreateReviewInput,
   TUpdateReviewInput
 } from '../zodSchema/review.zodSchema'
+import type { TQueryFilterByTourId } from '../middleware/setQueryFilterByTourId'
 
 /**
  * Retrieves all reviews based on the provided query and filter options.
  * @param {ExpressQuery} props.query - The query object containing request parameters.
- * @param {TReviewFindFilterOptions} props.reviewFindFilterOptions - The filter options for finding reviews.
+ * @param {TQueryFilterByTourId} props.TQueryFilterByTourId - The filter options for finding reviews.
  * @returns {Promise<IReviewDocument[]>} - A promise that resolves to an array of review documents.
  */
 type TProps = {
+  queryFilterByTourId: TQueryFilterByTourId
   query: ExpressQuery
-  reviewFindFilterOptions: TReviewFindFilterOptions
 }
+
 export async function getAllReviews({
-  query,
-  reviewFindFilterOptions
-}: TProps) {
+  queryFilterByTourId = {},
+  query
+}: TProps): Promise<IReviewDocument[]> {
   const reviews = await queryBuilderService<IReviewDocument>({
-    modelFindFilterOptions: reviewFindFilterOptions,
+    queryFilterByTourId,
     query,
     Model: Review
   })
@@ -37,7 +38,9 @@ export async function getAllReviews({
  * @param {string} reviewId - The ID of the review.
  * @returns {Promise<IReviewDocument | null>} - A promise that resolves to the review document, or null if not found.
  */
-export async function getReview(reviewId: string) {
+export async function getReview(
+  reviewId: string
+): Promise<IReviewDocument | null> {
   const review = await Review.findById(reviewId)
 
   return review
@@ -48,7 +51,9 @@ export async function getReview(reviewId: string) {
  * @param {TCreateReviewInput['body']} body - The body of the review.
  * @returns {Promise<IReviewDocument>} - A promise that resolves to the created review document.
  */
-export async function createReviewOnTour(body: TCreateReviewInput['body']) {
+export async function createReviewOnTour(
+  body: TCreateReviewInput['body']
+): Promise<IReviewDocument | null> {
   const review = await Review.create(body)
 
   return review
@@ -67,7 +72,7 @@ export async function updateReview({
 }: {
   filter: FilterQuery<IReviewDocument>
   update: UpdateQuery<TUpdateReviewInput['body']>
-}) {
+}): Promise<IReviewDocument | null> {
   const updatedReview = await Review.findOneAndUpdate(filter, update, {
     new: true
   })
@@ -80,7 +85,9 @@ export async function updateReview({
  * @param {string} reviewId - The ID of the review to delete.
  * @returns {Promise<IReviewDocument | null>} - A promise that resolves to the deleted review document, or null if not found.
  */
-export async function deleteReview(reviewId: string) {
+export async function deleteReview(
+  reviewId: string
+): Promise<IReviewDocument | null> {
   const deletedReview = await Review.findByIdAndDelete(reviewId)
 
   return deletedReview

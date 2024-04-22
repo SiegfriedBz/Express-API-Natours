@@ -13,9 +13,7 @@ import type {
   TCreateReviewInput,
   TUpdateReviewInput
 } from '../zodSchema/review.zodSchema'
-
-export type TReviewFindFilterOptions = { tour: string } | undefined
-// { tour: tourId } on /tours/:id/reviews route
+import type { TQueryFilterByTourId } from '../middleware/setQueryFilterByTourId'
 
 /** Handle
  * GET /api/v1/reviews
@@ -28,12 +26,12 @@ export const getAllReviewsHandler = async (
 ) => {
   try {
     const { query } = req
-    const reviewFindFilterOptions: TReviewFindFilterOptions =
-      res?.locals?.findFilterOptions
+    const queryFilterByTourId: TQueryFilterByTourId =
+      res?.locals?.queryFilterByTourId
 
     const reviews: IReviewDocument[] = await getAllReviews({
-      query,
-      reviewFindFilterOptions
+      queryFilterByTourId,
+      query
     })
 
     return res.status(200).json({

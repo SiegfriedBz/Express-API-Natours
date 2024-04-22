@@ -9,6 +9,10 @@ export default {
   appDomainName: 'APP_DOMAIN_NAME',
   dbUri: MONGO_URL,
   cors: { allowedOrigins: 'CORS_ALLOWED_ORIGINS' },
+  stripe: {
+    stripePrivateKey: 'STRIPE_PRIVATE_KEY',
+    stripePublicKey: 'STRIPE_PUBLIC_KEY'
+  },
   tokens: {
     accessTokenPrivateKey: 'ACCESS_TOKEN_PRIVATE_KEY',
     accessTokenPublicKey: 'ACCESS_TOKEN_PUBLIC_KEY',
