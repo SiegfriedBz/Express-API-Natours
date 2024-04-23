@@ -42,7 +42,7 @@ export const createSessionHandler = async (
       return next(
         new AppError({
           statusCode: 500,
-          message: 'Something went wring while creating session'
+          message: 'Something went wrong while creating session'
         })
       )
     }
@@ -61,18 +61,8 @@ export const createSessionHandler = async (
     })
 
     // 4. Set cookies
-    res.cookie(
-      'accessToken',
-      accessToken,
-      setTokenCookieOptions()
-      // 'accessToken'
-    )
-    res.cookie(
-      'refreshToken',
-      refreshToken,
-      setTokenCookieOptions()
-      // 'refreshToken'
-    )
+    res.cookie('accessToken', accessToken, setTokenCookieOptions())
+    res.cookie('refreshToken', refreshToken, setTokenCookieOptions())
 
     // 5. Send access + refresh tokens
     res.status(200).json({
