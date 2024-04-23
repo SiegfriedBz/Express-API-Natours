@@ -19,6 +19,9 @@ export default {
       'pk_test_51OATwgGyO055z3D9vjQz2YQXdxrmvqMP7aQpGTfVEyurUFVNDtDLIdhMnPFRJmCabQiYFFQ0Lrkz3TLBioAo1QIk00bKqGaT8C'
   },
   tokens: {
+    passwordResetToken: {
+      expiresIn: 600000
+    },
     accessTokenPrivateKey: `-----BEGIN RSA PRIVATE KEY-----
 MIIJJwIBAAKCAgEA1N0xNx8LTCSoHCpgVnddrvasDltnZH/FiTz+A+K9ZB7BPJPV
 C8ZXfYyp/xMavef1f2r6k1ybFW4xu0qiKSYJD6voEMMtIuxpvx0DcdjrtzTLPcRz
