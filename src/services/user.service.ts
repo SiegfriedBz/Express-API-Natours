@@ -1,3 +1,4 @@
+import crypto from 'crypto'
 import { omit } from 'lodash'
 import User from '../models/user.model'
 import AppError from '../utils/AppError.utils'
@@ -8,8 +9,105 @@ import type {
   TUpdateMeInput
 } from '../zodSchema/user.zodSchema'
 import type { IUserDocument } from '../types/user.types'
+import logger from '../utils/logger.utils'
 
-type TUserWithoutPassword = Omit<IUserDocument, 'password'>
+export type TUserWithoutPassword = Omit<IUserDocument, 'password'>
+
+/**
+ * Sets the password reset token for a user.
+ * @param email - The email of the user.
+ * @returns An object containing the user without the password field and the reset token.
+ * @throws {AppError} If there is no user with the provided email address.
+ */
+export async function setPasswordResetToken(
+  email: string
+): Promise<{ userWithoutPassword: TUserWithoutPassword; resetToken: string }> {
+  try {
+    /** 1. Get user */
+    const user = await User.findOne({ email })
+
+    if (!user) {
+      throw new AppError({
+        statusCode: 404,
+        message: 'There is no user with this email address'
+      })
+    }
+
+    /** 2. Create Password Reset Token + expiry date */
+    const resetToken = user.createPasswordResetToken()
+
+    /** 3. Save resetToken Hash w/OUT running validators (pswd...not provided) */
+    await user.save({ validateBeforeSave: false })
+
+    /** 4. Set user without password to return */
+    const userWithoutPassword = omit(
+      user.toObject(),
+      'password'
+    ) as unknown as Omit<IUserDocument, 'password'>
+
+    // return user & new password resetToken (not-hash)
+    return { userWithoutPassword, resetToken }
+  } catch (error) {
+    logger.info(error)
+    throw error
+  }
+}
+
+type TValidatePasswordResetTokenProps = {
+  password: string
+  submittedResetPasswordToken: string
+}
+/**
+ * Validates the password reset token and updates the user's password.
+ * @param password - The new password.
+ * @param submittedResetPasswordToken - The submitted reset password token.
+ * @returns The updated user without the password field.
+ * @throws {AppError} If the reset token is invalid or has expired.
+ */
+export async function validatePasswordResetToken({
+  password,
+  submittedResetPasswordToken
+}: TValidatePasswordResetTokenProps): Promise<TUserWithoutPassword> {
+  try {
+    /** 1. Hash submittedToken */
+    const submittedTokenHash = crypto
+      .createHash('sha256')
+      .update(submittedResetPasswordToken)
+      .digest('hex')
+
+    /** 2. Check if valid submittedToken */
+    const user = await User.findOne({
+      passwordResetToken: submittedTokenHash,
+      passwordResetTokenExpiresAt: {
+        $gt: Date.now()
+      }
+    })
+
+    if (!user) {
+      throw new AppError({
+        statusCode: 404,
+        message: 'Your reset token is invalid or has expired'
+      })
+    }
+
+    /** 3. Update user password & Re-init resetPassword token */
+    user.password = password
+    user.passwordResetToken = ''
+    user.passwordResetTokenExpiresAt = new Date(0)
+    await user.save()
+
+    /** 4. Set user without password to return */
+    const userWithoutPassword = omit(
+      user.toObject(),
+      'password'
+    ) as unknown as Omit<IUserDocument, 'password'>
+
+    return userWithoutPassword
+  } catch (error) {
+    logger.info(error)
+    throw error
+  }
+}
 
 export async function createUser(
   inputData: TCreateUserInput['body']
