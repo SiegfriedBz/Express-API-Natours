@@ -1,21 +1,30 @@
 import { omit } from 'lodash'
 import {
-  checkPassword,
   createUser,
   getAllUsers,
   getUser,
-  updateUser
+  updateUser,
+  checkPassword,
+  setPasswordResetToken,
+  validatePasswordResetToken,
+  TUserWithoutPassword
 } from '../services/user.service'
-import { generateTokens } from '../services/session.service'
+import {
+  sendWelcomeEmail,
+  sendForgotMyPasswordEmail
+} from '../services/email.service'
+import { createSession, generateTokens } from '../services/session.service'
 import setTokenCookieOptions from '../utils/setTokenCookieOptions.utils'
 import AppError from '../utils/AppError.utils'
 import logger from '../utils/logger.utils'
 import type { Request, Response, NextFunction } from 'express'
 import type {
-  TAdminUpdateUserInput,
   TCreateUserInput,
   TUpdateMeInput,
-  TUpdateMyPasswordInput
+  TUpdateMyPasswordInput,
+  TForgotMyPasswordInput,
+  TResetMyPasswordInput,
+  TAdminUpdateUserInput
 } from '../zodSchema/user.zodSchema'
 import type { IUserDocument } from '../types/user.types'
 
@@ -28,7 +37,14 @@ export const createUserHandler = async (
   try {
     const { body } = req
 
-    const user = await createUser(body)
+    /** 1. Create user */
+    const user: TUserWithoutPassword | null = await createUser(body)
+
+    if (user) {
+      /** 2. Send Welcome email */
+      const url = `${req.protocol}://${req.get('host')}/me`
+      await sendWelcomeEmail({ user, url })
+    }
 
     return res.status(201).json({
       status: 'success',
@@ -37,6 +53,103 @@ export const createUserHandler = async (
   } catch (err: unknown) {
     logger.error(err)
     next(err)
+  }
+}
+
+/** User Reset Password - Step 1
+ * POST EMAIL
+ * => Send Email with Reset Password Token
+ */
+export const forgotMyPasswordHandler = async (
+  req: Request<object, object, TForgotMyPasswordInput['body']>,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const {
+      body: { email }
+    } = req
+
+    /** 1. Get user & password reset token */
+    const { userWithoutPassword: user, resetToken } =
+      await setPasswordResetToken(email)
+
+    /** 2. Send Email with Reset Token / Link */
+    const url = `${req.protocol}://${req.get(
+      'host'
+    )}/reset-my-password/${resetToken}`
+    await sendForgotMyPasswordEmail({ user, url })
+
+    /** 3. Send response */
+    res.status(200).json({
+      status: 'success',
+      message: `Please check your email ${user.email} to change your password.`
+    })
+  } catch (error) {
+    logger.info(error)
+    next(error)
+  }
+}
+
+/** User Reset Password - Step 2
+ * POST NEW password (+ confirmation) + Reset Password Token
+ * => Send Fresh JWTs
+ */
+export const resetMyPasswordHandler = async (
+  req: Request<object, object, TResetMyPasswordInput['body']>,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const {
+      body: { password, resetPasswordToken: submittedResetPasswordToken }
+    } = req
+
+    /** 1. Get user based on the resetPasswordToken & Check if resetPasswordToken is still Valid */
+    const user: TUserWithoutPassword = await validatePasswordResetToken({
+      password,
+      submittedResetPasswordToken
+    })
+
+    if (!user) {
+      return next(
+        new AppError({
+          statusCode: 500,
+          message: 'Something went wrong while updating your password'
+        })
+      )
+    }
+
+    /** 2. Create new session */
+    const session = await createSession(user._id)
+
+    if (!session) {
+      return next(
+        new AppError({
+          statusCode: 500,
+          message: 'Something went wrong while creating a new session'
+        })
+      )
+    }
+
+    /** 3. Generate new access + refresh Tokens */
+    const { accessToken, refreshToken } = generateTokens({
+      user,
+      sessionId: session._id
+    })
+
+    /** 4. Set cookies & response */
+    res.cookie('accessToken', accessToken, setTokenCookieOptions())
+    res.cookie('refreshToken', refreshToken, setTokenCookieOptions())
+
+    /** 5. Send response with cookies/JWTs*/
+    return res.status(200).json({
+      status: 'success',
+      data: { user }
+    })
+  } catch (error) {
+    logger.info(error)
+    next(error)
   }
 }
 
@@ -104,7 +217,7 @@ export const updateMeHandler = async (
       return next(
         new AppError({
           statusCode: 500,
-          message: 'Something went wring while updating user'
+          message: 'Something went wrong while updating user'
         })
       )
     }
@@ -116,18 +229,8 @@ export const updateMeHandler = async (
     })
 
     // Set cookies & response
-    res.cookie(
-      'accessToken',
-      accessToken,
-      setTokenCookieOptions()
-      // 'accessToken'
-    )
-    res.cookie(
-      'refreshToken',
-      refreshToken,
-      setTokenCookieOptions()
-      // 'refreshToken'
-    )
+    res.cookie('accessToken', accessToken, setTokenCookieOptions())
+    res.cookie('refreshToken', refreshToken, setTokenCookieOptions())
 
     // Send response
     return res.status(200).json({

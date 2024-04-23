@@ -1,5 +1,17 @@
 export default {
-  cors: { allowedOrigins: 'http://localhost:3000' },
+  email: {
+    from: 'Natours <hello@natours.com>',
+    brevo: {
+      emailAdmin: '',
+      emailSmtpKey: ''
+    },
+    mailtrap: {
+      emailHost: '',
+      emailPort: 0,
+      emailUsername: '',
+      emailPassword: ''
+    }
+  },
   stripe: {
     stripePrivateKey:
       'sk_test_51OATwgGyO055z3D9eOYJ73jSMWPYmaMdin20BMynmAPGEv2DwLP57ctckumiJoaYznVp1DmMLQu5uF8ADWtJldjx00mPdzCceU',

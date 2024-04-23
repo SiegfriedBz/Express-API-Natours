@@ -12,5 +12,9 @@ export interface IUserDBInput {
 export interface IUserDocument extends IUserDBInput, mongoose.Document {
   createdAt: Date
   updatedAt: Date
+  passwordChangedAt: Date
+  passwordResetToken: string
+  passwordResetTokenExpiresAt: Date
   comparePassword: (candidatePassword: string) => Promise<boolean>
+  createPasswordResetToken: () => string
 }

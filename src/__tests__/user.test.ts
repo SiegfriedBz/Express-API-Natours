@@ -2,6 +2,7 @@ import { MongoMemoryServer } from 'mongodb-memory-server'
 import mongoose from 'mongoose'
 import supertest from 'supertest'
 import User from '../models/user.model'
+import * as emailService from '../services/email.service'
 import createServer from '../utils/createServer.utils'
 import { handleMongoTestServer } from './utils.ts/handleMongoTestServer.utils'
 import { createUserAs } from './utils.ts/createUserAs.utils'
@@ -12,6 +13,13 @@ import {
   generateUserAsInput
 } from './fixtures/user/generateUserAsInput.fixture'
 import type { IUserDocument } from '../types/user.types'
+import { setPasswordResetToken } from '../services/user.service'
+import {
+  TForgotMyPasswordInput,
+  TResetMyPasswordInput
+} from '../zodSchema/user.zodSchema'
+import { verifyJWT } from '../utils/jwt.utils'
+import { IDecodedToken } from '../types/tokens.types'
 
 const app = createServer()
 
@@ -36,14 +44,40 @@ describe('User routes', () => {
   })
 
   describe('Create user route - sign up', () => {
+    /** SET sendWelcomeEmail MOCK  */
+    let sendWelcomeEmailMock: jest.SpyInstance<
+      Promise<boolean>,
+      [emailService.TSendEmailProps],
+      unknown
+    > | null = null
+
+    beforeEach(() => {
+      sendWelcomeEmailMock = jest
+        .spyOn(emailService, 'sendWelcomeEmail')
+        .mockImplementation(() => Promise.resolve(true))
+    })
+
     describe('With a valid input', () => {
-      it('should return 201 + user', async () => {
+      it('should call sendWelcomeEmail Service with the correct object shape + return 201 + user', async () => {
         // Create user
         const { body } = await supertest(app)
           .post('/api/v1/users/signup')
           .send(userInput)
           .expect(201)
 
+        // Check sendWelcomeEmail Service was called
+        expect(sendWelcomeEmailMock).toHaveBeenCalledTimes(1)
+        expect(sendWelcomeEmailMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            user: expect.objectContaining({
+              name: userInput.name,
+              email: userInput.email
+            }),
+            url: expect.any(String)
+          })
+        )
+
+        // Check HTTP Response
         expect(body).toEqual(
           expect.objectContaining({
             status: 'success',
@@ -59,7 +93,7 @@ describe('User routes', () => {
     })
 
     describe('When passwords do not match', () => {
-      it('should return 400 + correct error message', async () => {
+      it('should NOT call sendWelcomeEmail Service + return 400 + correct error message', async () => {
         // Create user
         const { body } = await supertest(app)
           .post('/api/v1/users/signup')
@@ -69,12 +103,17 @@ describe('User routes', () => {
           })
           .expect(400)
 
+        // Check sendWelcomeEmail Service was called
+        expect(sendWelcomeEmailMock).not.toHaveBeenCalled()
+
+        // Check HTTP Response
+        expect(body.status).toBe('fail')
         expect(body.error.message).toContain('Passwords do not match')
       })
     })
 
     describe('With missing passwordConfirmation input', () => {
-      it('should return 400 + correct error message', async () => {
+      it('should NOT call sendWelcomeEmail service + return 400 + correct error message', async () => {
         const invalidUserInput: {
           name: string
           email: string
@@ -89,7 +128,221 @@ describe('User routes', () => {
           .send(invalidUserInput)
           .expect(400)
 
+        // Check sendWelcomeEmail Service was called
+        expect(sendWelcomeEmailMock).not.toHaveBeenCalled()
+
+        // Check HTTP Response
+        expect(body.status).toBe('fail')
         expect(body.error.message).toContain('passwordConfirmation is required')
+      })
+    })
+  })
+
+  describe('User - Forgot my password route', () => {
+    /** SET sendForgotMyPasswordEmail MOCK  */
+    let sendForgotMyPasswordEmailMock: jest.SpyInstance<
+      Promise<boolean>,
+      [emailService.TSendEmailProps],
+      unknown
+    > | null = null
+
+    beforeEach(() => {
+      sendForgotMyPasswordEmailMock = jest
+        .spyOn(emailService, 'sendForgotMyPasswordEmail')
+        .mockImplementation(() => Promise.resolve(true))
+    })
+
+    /** Create user */
+    let user: IUserDocument | null = null
+
+    beforeEach(async () => {
+      user = await createUserAs({ as: 'user' })
+    })
+
+    describe('When User inputs a registered email', () => {
+      it('should call sendForgotMyPasswordEmail Service with the correct object shape + return 200 and correct success message', async () => {
+        const validInputData: TForgotMyPasswordInput['body'] = {
+          email: (user as IUserDocument).email
+        }
+
+        const { body } = await supertest(app)
+          .post('/api/v1/users/forgot-my-password')
+          .send(validInputData)
+          .expect(200)
+
+        // Check sendWelcomeEmail Service was called
+        expect(sendForgotMyPasswordEmailMock).toHaveBeenCalledTimes(1)
+        expect(sendForgotMyPasswordEmailMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            user: expect.objectContaining({
+              name: user?.name,
+              email: user?.email
+            }),
+            url: expect.any(String)
+          })
+        )
+
+        // Check HTTP Response
+        expect(body).toEqual(
+          expect.objectContaining({
+            status: 'success',
+            message: `Please check your email ${user?.email} to change your password.`
+          })
+        )
+      })
+    })
+
+    describe('When User inputs an UN-REGISTERED email', () => {
+      it('should NOT call sendForgotMyPasswordEmail Service + send 404 and correct error message', async () => {
+        const inValidInputData: TForgotMyPasswordInput['body'] = {
+          email: 'invalid@invalid.com'
+        }
+
+        const { body } = await supertest(app)
+          .post('/api/v1/users/forgot-my-password')
+          .send(inValidInputData)
+          .expect(404)
+
+        // Check sendWelcomeEmail Service was called
+        expect(sendForgotMyPasswordEmailMock).not.toHaveBeenCalled()
+
+        // Check HTTP Response
+        expect(body.status).toBe('fail')
+        expect(body.error.message).toContain(
+          'There is no user with this email address'
+        )
+      })
+    })
+  })
+
+  describe('User - Reset my password route', () => {
+    /** Create user */
+    let user: IUserDocument | null = null
+
+    beforeEach(async () => {
+      user = await createUserAs({ as: 'user' })
+    })
+
+    describe('With a valid input', () => {
+      it('should return 200 + user + fresh valid JWTs', async () => {
+        /** 1. Get password reset token using service */
+        const { resetToken } = await setPasswordResetToken(
+          (user as IUserDocument).email
+        )
+
+        /** 2. Send User Reset Password request */
+        const validInputData: TResetMyPasswordInput['body'] = {
+          password: 'NEW-PASSWORD',
+          passwordConfirmation: 'NEW-PASSWORD',
+          resetPasswordToken: resetToken
+        }
+
+        const { body, headers } = await supertest(app)
+          .patch('/api/v1/users/reset-my-password')
+          .send(validInputData)
+          .expect(200)
+
+        const { accessToken, refreshToken } = getTokensFrom({ headers })
+
+        // Check tokens are valid JWT
+        const decodedAccessToken = verifyJWT({
+          token: accessToken as string,
+          tokenType: 'accessToken'
+        })
+        expect((decodedAccessToken as IDecodedToken).valid).toBe(true)
+        expect(decodedAccessToken).toEqual(
+          expect.objectContaining({
+            valid: true,
+            decoded: expect.objectContaining({
+              user: expect.objectContaining({
+                _id: user?._id.toString(),
+                name: user?.name,
+                email: user?.email
+              })
+            })
+          })
+        )
+
+        const decodedRefreshToken = verifyJWT({
+          token: refreshToken as string,
+          tokenType: 'refreshToken'
+        })
+        expect(decodedRefreshToken).toEqual(
+          expect.objectContaining({
+            valid: true,
+            decoded: expect.objectContaining({
+              user: expect.objectContaining({
+                _id: user?._id.toString(),
+                name: user?.name,
+                email: user?.email
+              })
+            })
+          })
+        )
+
+        // Check Response
+        expect(body).toEqual(
+          expect.objectContaining({
+            status: 'success',
+            data: expect.objectContaining({
+              user: expect.objectContaining({
+                _id: user?._id.toString(),
+                name: user?.name,
+                email: user?.email
+              })
+            })
+          })
+        )
+      })
+    })
+
+    describe('With an INVALID new password confirmation + valid reset password token', () => {
+      it('should return 400 + correct error message', async () => {
+        /** 1. Get password reset token using service */
+        const { resetToken } = await setPasswordResetToken(
+          (user as IUserDocument).email
+        )
+
+        /** 2. Send User Reset Password request */
+        const invalidInputData: TResetMyPasswordInput['body'] = {
+          password: 'NEW-PASSWORD',
+          passwordConfirmation: 'WRONG-CONFIRMATION',
+          resetPasswordToken: resetToken
+        }
+
+        const { body } = await supertest(app)
+          .patch('/api/v1/users/reset-my-password')
+          .send(invalidInputData)
+          .expect(400)
+
+        // Check Response
+        expect(body.status).toBe('fail')
+        expect(body.error.message).toBe('Passwords do not match')
+      })
+    })
+
+    describe('With an INVALID reset password token', () => {
+      it('should return 404 + correct error message', async () => {
+        /** 1. Set INVALID password reset token */
+        const invalidResetToken = 'INVALID'
+
+        /** 2. Send User Reset Password request */
+        const invalidInputData: TResetMyPasswordInput['body'] = {
+          password: 'NEW-PASSWORD',
+          passwordConfirmation: 'NEW-PASSWORD',
+          resetPasswordToken: invalidResetToken
+        }
+
+        const { body } = await supertest(app)
+          .patch('/api/v1/users/reset-my-password')
+          .send(invalidInputData)
+          .expect(404)
+
+        // Check Response
+        expect(body.status).toBe('fail')
+        expect(body.error.message).toBe(
+          'Your reset token is invalid or has expired'
+        )
       })
     })
   })
