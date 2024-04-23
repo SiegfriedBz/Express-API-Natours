@@ -1,9 +1,11 @@
 import express from 'express'
 import {
   createUserHandler,
+  forgotMyPasswordHandler,
   getAllUsersHandler,
   getMeHandler,
   getUserHandler,
+  resetMyPasswordHandler,
   updateMeHandler,
   updateMyPasswordHandler,
   updateUserHandler
@@ -18,22 +20,32 @@ import {
   createUserZodSchema,
   adminUpdateUserZodSchema,
   updateMeZodSchema,
-  updateMyPasswordZodSchema
+  updateMyPasswordZodSchema,
+  forgotMyPasswordZodSchema,
+  resetMyPasswordZodSchema
 } from '../zodSchema/user.zodSchema'
 
 const router = express.Router()
 
 router
   .route('/signup')
-  /** SIGNUP */
   .post(validateRequest(createUserZodSchema), createUserHandler)
+
+router
+  .route('/forgot-my-password')
+  .post(validateRequest(forgotMyPasswordZodSchema), forgotMyPasswordHandler)
+
+router
+  .route('/reset-my-password')
+  .patch(validateRequest(resetMyPasswordZodSchema), resetMyPasswordHandler)
 
 /** User-protected routes */
 router.use(requireUser)
 
 router.route('/me').get(getMeHandler)
+
 router
-  .route('/update-me')
+  .route('/update-me') // except password
   .patch(
     multerUpload(userMulterUploadFields),
     validateRequest(updateMeZodSchema),
@@ -41,7 +53,7 @@ router
     updateMeHandler
   )
 router
-  .route('/update-my-password')
+  .route('/update-my-password') // only password
   .patch(validateRequest(updateMyPasswordZodSchema), updateMyPasswordHandler)
 
 /** Admin-protected routes */
