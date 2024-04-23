@@ -1,6 +1,8 @@
+import 'dotenv/config'
 import config from 'config'
 import mongoose from 'mongoose'
 import bcrypt from 'bcrypt'
+import crypto from 'crypto'
 import { USER_ROLES } from '../zodSchema/user.zodSchema'
 import type { IUserDocument } from '../types/user.types'
 
@@ -17,7 +19,10 @@ const userSchema = new mongoose.Schema(
         message: `User role must be chosen between ${USER_ROLES.join(', ')}`
       },
       default: 'user'
-    }
+    },
+    passwordChangedAt: Date,
+    passwordResetToken: String,
+    passwordResetTokenExpiresAt: Date
   },
   { timestamps: true }
 )
@@ -43,6 +48,26 @@ userSchema.methods.comparePassword = async function (
   const user = this as IUserDocument
 
   return bcrypt.compare(candidatePassword, user.password).catch(() => false)
+}
+
+userSchema.methods.createPasswordResetToken = function () {
+  // get rdm string
+  const resetToken = crypto.randomBytes(32).toString('hex')
+
+  // light-hash
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex')
+
+  this.passwordResetTokenExpiresAt =
+    Date.now() +
+    parseInt(
+      config.get<number>('tokens.passwordResetToken.expiresIn').toString(),
+      10
+    )
+
+  return resetToken
 }
 
 export default mongoose.model<IUserDocument>('User', userSchema)
