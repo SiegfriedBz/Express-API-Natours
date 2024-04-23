@@ -6,6 +6,7 @@ const params = {
   userId: z.string()
 }
 
+/** USER */
 // User - Signup
 const createUserZodSchema = z.object({
   body: z
@@ -79,6 +80,39 @@ const updateMyPasswordZodSchema = z.object({
     })
 })
 
+// User - Forgot my password
+const forgotMyPasswordZodSchema = z.object({
+  body: z.object({
+    email: z
+      .string({
+        required_error: 'Email is required'
+      })
+      .email('Not a valid email')
+  })
+})
+// User - Reset my password
+const resetMyPasswordZodSchema = z.object({
+  body: z
+    .object({
+      password: z
+        .string({
+          required_error: 'Password is required'
+        })
+        .min(6, 'Password too short - should be 6 chars minimum'),
+      passwordConfirmation: z.string({
+        required_error: 'passwordConfirmation is required'
+      }),
+      resetPasswordToken: z.string({
+        required_error: 'resetPasswordToken is required'
+      })
+    })
+    .refine((data) => data.password === data.passwordConfirmation, {
+      message: 'Passwords do not match',
+      path: ['passwordConfirmation']
+    })
+})
+
+/** ADMIN */
 // Admin - update user
 const adminUpdateUserZodSchema = z.object({
   params: z.object({
@@ -102,18 +136,25 @@ const adminUpdateUserZodSchema = z.object({
 type TCreateUserInput = z.TypeOf<typeof createUserZodSchema>
 type TUpdateMeInput = z.TypeOf<typeof updateMeZodSchema>
 type TUpdateMyPasswordInput = z.TypeOf<typeof updateMyPasswordZodSchema>
+type TForgotMyPasswordInput = z.TypeOf<typeof forgotMyPasswordZodSchema>
+type TResetMyPasswordInput = z.TypeOf<typeof resetMyPasswordZodSchema>
+
 type TAdminUpdateUserInput = z.TypeOf<typeof adminUpdateUserZodSchema>
 
 export {
   createUserZodSchema,
-  adminUpdateUserZodSchema,
   updateMeZodSchema,
-  updateMyPasswordZodSchema
+  updateMyPasswordZodSchema,
+  forgotMyPasswordZodSchema,
+  resetMyPasswordZodSchema,
+  adminUpdateUserZodSchema
 }
 
 export type {
   TCreateUserInput,
-  TAdminUpdateUserInput,
   TUpdateMeInput,
-  TUpdateMyPasswordInput
+  TUpdateMyPasswordInput,
+  TForgotMyPasswordInput,
+  TResetMyPasswordInput,
+  TAdminUpdateUserInput
 }
