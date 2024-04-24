@@ -18,6 +18,13 @@ import type {
 } from '../zodSchema/tour.zodSchema'
 import type { ITourDocument } from '../types/tour.types'
 
+/**
+ * Handler function to get all tours.
+ * @param req - The request object.
+ * @param res - The response object.
+ * @param next - The next function.
+ * @returns A JSON response with the status, data count, and tours.
+ */
 export const getAllToursHandler = async (
   req: Request,
   res: Response,
@@ -39,6 +46,14 @@ export const getAllToursHandler = async (
   }
 }
 
+/**
+ * Get tour handler function.
+ * Retrieves a tour by its ID and sends a JSON response with the tour data.
+ *
+ * @param req - Express request object with tourId parameter.
+ * @param res - Express response object.
+ * @param next - Express next function.
+ */
 export const getTourHandler = async (
   req: Request<{ tourId: string }, object, object>,
   res: Response,
@@ -67,6 +82,14 @@ export const getTourHandler = async (
 
 /** Protected
  *  Admin & Lead-Guide
+ */
+/**
+ * Handles the creation of a new tour.
+ *
+ * @param req - The request object containing the tour data in the body.
+ * @param res - The response object used to send the response.
+ * @param next - The next function to call in the middleware chain.
+ * @returns A JSON response with the newly created tour.
  */
 export const createTourHandler = async (
   req: Request<object, object, TCreateTourInput['body']>,
@@ -105,6 +128,14 @@ export const createTourHandler = async (
 
 /** Protected
  *  Admin & Lead-Guide
+ */
+/**
+ * Update tour handler.
+ *
+ * @param req - The request object.
+ * @param res - The response object.
+ * @param next - The next function.
+ * @returns A JSON response with the updated tour data.
  */
 export const updateTourHandler = async (
   req: Request<TUpdateTourInput['params'], object, TUpdateTourInput['body']>,
@@ -151,6 +182,15 @@ export const updateTourHandler = async (
 /** Protected
  *  Admin & Lead-Guide
  */
+/**
+ * Handles the deletion of a tour.
+ *
+ * @param req - The request object containing the tourId parameter.
+ * @param res - The response object.
+ * @param next - The next function to call in the middleware chain.
+ * @returns A response with status 204 if the tour is successfully deleted.
+ * @throws AppError if the tour is not found.
+ */
 export const deleteTourHandler = async (
   req: Request<{ tourId: string }, object, object>,
   res: Response,
@@ -175,6 +215,13 @@ export const deleteTourHandler = async (
 }
 
 /** Stats */
+/**
+ * Handler function for getting tour statistics.
+ *
+ * @param req - The request object.
+ * @param res - The response object.
+ * @param next - The next function.
+ */
 export const getToursStatsHandler = async (
   req: Request,
   res: Response,
@@ -195,6 +242,14 @@ export const getToursStatsHandler = async (
   }
 }
 
+/**
+ * Handler function for getting monthly statistics for tours.
+ *
+ * @param req - The request object containing the year parameter.
+ * @param res - The response object.
+ * @param next - The next function to call in the middleware chain.
+ * @returns A JSON response with the monthly statistics for tours.
+ */
 export const getToursMonthlyStatsHandler = async (
   req: Request<{ year: string }, object, object>,
   res: Response,
@@ -220,6 +275,14 @@ export const getToursMonthlyStatsHandler = async (
 }
 
 /** Geo */
+/**
+ * Handler function to get tours within a certain distance from a given location.
+ *
+ * @param req - The request object containing the distance, latlng, and unit parameters.
+ * @param res - The response object to send the result.
+ * @param next - The next function to call in the middleware chain.
+ * @returns A JSON response with the status and data containing the tours within the specified distance.
+ */
 export const getToursWithinHandler = async (
   req: Request<
     { distance: string; latlng: string; unit: string },
@@ -248,6 +311,14 @@ export const getToursWithinHandler = async (
   }
 }
 
+/**
+ * Handler function for getting distances.
+ *
+ * @param req - The request object containing the latitude and longitude coordinates and the unit of measurement.
+ * @param res - The response object.
+ * @param next - The next function to be called in the middleware chain.
+ * @returns A JSON response with the distances.
+ */
 export const getDistancesHandler = async (
   req: Request<{ latlng: string; unit: string }, object, object>,
   res: Response,

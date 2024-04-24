@@ -13,6 +13,13 @@ import type { TCreateSessionInput } from '../zodSchema/session.zodSchema'
 import type { IUserDocument } from '../types/user.types'
 
 /** LOGIN */
+/**
+ * Creates a session for a user.
+ *
+ * @param req - The request object containing the user's email and password.
+ * @param res - The response object to send the access and refresh tokens.
+ * @param next - The next function to handle errors.
+ */
 export const createSessionHandler = async (
   req: Request<object, object, TCreateSessionInput['body']>,
   res: Response,
@@ -82,6 +89,13 @@ export const createSessionHandler = async (
 }
 
 /** LOGOUT */
+/**
+ * Deletes a session and invalidates associated tokens.
+ * @param req - The request object.
+ * @param res - The response object.
+ * @param next - The next function.
+ * @returns A JSON response with a success status.
+ */
 export const deleteSessionHandler = async (
   req: Request,
   res: Response,

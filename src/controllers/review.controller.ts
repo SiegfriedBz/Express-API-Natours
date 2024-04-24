@@ -15,9 +15,15 @@ import type {
 } from '../zodSchema/review.zodSchema'
 import type { TQueryFilterByTourId } from '../middleware/setQueryFilterByTourId'
 
-/** Handle
+/**
+ * Handler function to get all reviews.
  * GET /api/v1/reviews
  * GET /api/v1/tours/:id/reviews
+ *
+ * @param req - The request object.
+ * @param res - The response object.
+ * @param next - The next function.
+ * @returns A JSON response with the status, data count, and reviews.
  */
 export const getAllReviewsHandler = async (
   req: Request,
@@ -45,8 +51,13 @@ export const getAllReviewsHandler = async (
   }
 }
 
-/** Handle
+/**
+ * Retrieves a review by its ID.
  * GET /api/v1/reviews/:reviewId
+ *
+ * @param req - The request object containing the review ID.
+ * @param res - The response object to send the review data.
+ * @param next - The next function to handle errors.
  */
 export async function getReviewHandler(
   req: Request<{ reviewId: string }, object, object>,
@@ -82,8 +93,14 @@ export async function getReviewHandler(
 /** Protected
  *  User who booked a tour && left 0 review on this tour
  */
-/** Handle
+/**
+ * Creates a new review on a tour.
  * POST /api/v1/tours/:id/reviews
+ *
+ * @param req - The request object containing the review data in the body.
+ * @param res - The response object used to send the JSON response.
+ * @param next - The next function to call in the middleware chain.
+ * @returns A JSON response with the newly created review.
  */
 export async function createReviewOnTourHandler(
   req: Request<object, object, TCreateReviewInput['body']>,
@@ -111,8 +128,13 @@ export async function createReviewOnTourHandler(
 /** Protected
  *  User who booked a tour && left this review on this tour
  */
-/** Handle
+/**
+ * Handles the update review request.
  * PATCH /api/v1/reviews/:reviewId
+ *
+ * @param req - The request object containing the review ID in the params and the updated review data in the body.
+ * @param res - The response object used to send the updated review data.
+ * @param next - The next function used to pass control to the next middleware.
  */
 export async function updateReviewHandler(
   req: Request<
@@ -153,8 +175,15 @@ export async function updateReviewHandler(
 /** Protected
  *  Admin
  */
-/** Handle
+/**
+ * Deletes a review.
  * DELETE /api/v1/reviews/:reviewId
+ *
+ * @param req - The request object containing the reviewId parameter.
+ * @param res - The response object.
+ * @param next - The next function to call in the middleware chain.
+ * @returns A 204 No Content response if the review is successfully deleted.
+ * @throws {AppError} If the review is not found.
  */
 export async function deleteReviewHandler(
   req: Request<{ reviewId: string }, object, object>,

@@ -13,6 +13,14 @@ import type { IBookingDocument } from '../types/booking.types'
 import type { TCreateBookingInput } from '../zodSchema/booking.zodSchema'
 
 /** GET Stripe Session */
+/**
+ * Handles the request to get the Stripe checkout session for a specific tour.
+ *
+ * @param req - The request object containing the tourId parameter.
+ * @param res - The response object.
+ * @param next - The next function to call in the middleware chain.
+ * @returns A JSON response with the Stripe checkout session.
+ */
 export const getStripeCheckoutSessionHandler = async (
   req: Request<{ tourId: string }, object, object>,
   res: Response,
@@ -46,6 +54,14 @@ export const getStripeCheckoutSessionHandler = async (
   })
 }
 
+/**
+ * Creates a booking for a tour.
+ *
+ * @param req - The request object containing the tour ID in the params.
+ * @param res - The response object.
+ * @param next - The next function to call in the middleware chain.
+ * @returns A JSON response with the newly created booking.
+ */
 export const createBookingOnTourHandler = async (
   req: Request<TCreateBookingInput['params'], object, object>,
   res: Response,
@@ -79,8 +95,9 @@ export const createBookingOnTourHandler = async (
 }
 
 /**
- * Handles the GET /api/v1/bookings and GET /api/v1/tours/:id/bookings routes.
  * Retrieves all bookings or bookings filtered by tour ID.
+ * GET /api/v1/bookings
+ * GET /api/v1/tours/:id/bookings
  *
  * This function performs the following steps:
  * 1. Extracts the query parameters from the request.
@@ -121,8 +138,8 @@ export const getAllBookingsHandler = async (
 }
 
 /**
- * Handles the GET /api/v1/bookings/:bookingId route.
  * Retrieves a specific booking by its ID.
+ * GET /api/v1/bookings/:bookingId
  *
  * This function performs the following checks:
  * 1. Checks if the booking exists. If not, it returns a 404 error.

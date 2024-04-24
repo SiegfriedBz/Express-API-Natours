@@ -109,6 +109,12 @@ export async function validatePasswordResetToken({
   }
 }
 
+/**
+ * Creates a new user.
+ * @param inputData - The user data.
+ * @returns The created user without the password field.
+ * @throws {AppError} If there is an error creating the user.
+ */
 export async function createUser(
   inputData: TCreateUserInput['body']
 ): Promise<TUserWithoutPassword | null> {
@@ -130,27 +136,38 @@ export async function createUser(
   }
 }
 
+/**
+ * Updates a user.
+ * @param filter - The filter to find the user.
+ * @param update - The data to update the user.
+ * @returns The updated user without the password field.
+ */
 export async function updateUser(
   filter: FilterQuery<IUserDocument>,
   update: UpdateQuery<TAdminUpdateUserInput['body'] | TUpdateMeInput['body']>
 ): Promise<TUserWithoutPassword | null> {
-  // TODO USE .select("-password")
-  const updatedUser = await User.findOneAndUpdate(filter, update, { new: true })
+  const updatedUser = await User.findOneAndUpdate(filter, update, {
+    new: true
+  }).select('-password')
 
   return updatedUser
-    ? (omit(updatedUser.toObject(), 'password') as unknown as Omit<
-        IUserDocument,
-        'password'
-      >)
-    : null
 }
 
+/**
+ * Retrieves all users.
+ * @returns An array of users without the password field.
+ */
 export async function getAllUsers(): Promise<TUserWithoutPassword[] | null> {
   const users = await User.find().select('-password')
 
   return users
 }
 
+/**
+ * Retrieves a user by ID.
+ * @param userId - The ID of the user.
+ * @returns The user without the password field.
+ */
 export async function getUser(
   userId: string
 ): Promise<TUserWithoutPassword | null> {
@@ -160,12 +177,17 @@ export async function getUser(
 }
 
 /** Helpers */
-// Check email/password and return user
+
+/**
+ * Checks the email and password of a user.
+ * @param email - The email of the user.
+ * @param password - The password of the user.
+ * @returns The user document if the email and password are valid, otherwise null.
+ */
 type TPropsCheckPassword = {
   email: string
   password: string
 }
-
 export async function checkPassword({
   email,
   password
