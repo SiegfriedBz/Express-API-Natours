@@ -35,7 +35,11 @@ export const createSessionHandler = async (
       )
     }
 
-    // 2. Create a Session
+    // 2. Set user isActive (in case user has previously used "fakeDeleteMe" route)
+    user.isActive = true
+    user.save()
+
+    // 3. Create a Session
     const newSession = await createSession(user._id)
 
     if (!newSession) {
@@ -47,24 +51,24 @@ export const createSessionHandler = async (
       )
     }
 
-    // 3. Create Tokens
-    // 3.1 Remove password from user
+    // 4. Create Tokens
+    // 4.1 Remove password from user
     const userWithoutPassword = omit(
       user.toObject(),
       'password'
     ) as unknown as Omit<IUserDocument, 'password'>
 
-    // 3.2 Create tokens
+    // 4.2 Create tokens
     const { accessToken, refreshToken } = generateTokens({
       user: userWithoutPassword,
       sessionId: newSession._id
     })
 
-    // 4. Set cookies
+    // 5. Set cookies
     res.cookie('accessToken', accessToken, setTokenCookieOptions())
     res.cookie('refreshToken', refreshToken, setTokenCookieOptions())
 
-    // 5. Send access + refresh tokens
+    // 6. Send access + refresh tokens
     res.status(200).json({
       status: 'success',
       data: {
@@ -84,14 +88,14 @@ export const deleteSessionHandler = async (
   next: NextFunction
 ) => {
   try {
-    // after deserializeAndRefreshUser - requireUser middlewares
+    // after deserializeAndRefreshUser - requireUser
     const sessionId = res.locals.sessionId
 
     await updateSession({ _id: sessionId }, { isValid: false })
 
     // kill tokens
-    res.cookie('accessToken', '')
-    res.cookie('refreshToken', '')
+    res.cookie('accessToken', '', setTokenCookieOptions())
+    res.cookie('refreshToken', '', setTokenCookieOptions())
 
     return res.status(200).json({
       status: 'success'
