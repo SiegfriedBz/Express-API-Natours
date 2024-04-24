@@ -375,7 +375,8 @@ describe('User routes', () => {
 
         expect(body.status).toBe('success')
         expect(body.data.user._id).toBe(user?._id.toString())
-        expect(body.data.user.name).toBe((user as IUserDocument).name)
+        expect(body.data.user.name).toBe(user?.name)
+        expect(body.data.user.isActive).toBe(true)
       })
     })
 
@@ -491,6 +492,7 @@ describe('User routes', () => {
 
           expect(body.status).toBe('success')
           expect(body.data.user.name).toBe(userInput.name)
+          expect(body.data.user.isActive).toBe(true)
 
           const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
             getTokensFrom({ headers })
@@ -546,6 +548,54 @@ describe('User routes', () => {
         expect(body.status).toBe('fail')
         expect(body.error.message).toBe('Please login to access this resource')
       })
+    })
+  })
+
+  describe('User - (fake) DeleteMe route', () => {
+    let user: IUserDocument | null = null
+    let userAccessTokenCookie: string = ''
+
+    beforeEach(async () => {
+      user = await createUserAs({ as: 'user' })
+      const { accessTokenCookie } = await loginAs({ asDocument: user, app })
+      userAccessTokenCookie = accessTokenCookie
+    })
+
+    it('should set user isActive to false + return 200 + updated user + invalid JWTs', async () => {
+      const { body, headers } = await supertest(app)
+        .patch('/api/v1/users/delete-me')
+        .set('Cookie', userAccessTokenCookie)
+        .expect(200)
+
+      // Check Response body
+      expect(body).toEqual(
+        expect.objectContaining({
+          status: 'success',
+          data: expect.objectContaining({
+            user: expect.objectContaining({
+              _id: user?._id?.toString(),
+              name: user?.name,
+              email: user?.email,
+              isActive: false
+            })
+          })
+        })
+      )
+
+      // Check Response cookies
+      // Check tokens are NOT valid JWTs
+      const { accessToken, refreshToken } = getTokensFrom({ headers })
+      const decodedAccessToken = verifyJWT({
+        token: accessToken as string,
+        tokenType: 'accessToken'
+      })
+      expect((decodedAccessToken as IDecodedToken).valid).toBe(false)
+
+      const decodedRefreshToken = verifyJWT({
+        token: refreshToken as string,
+        tokenType: 'refreshToken'
+      })
+      expect((decodedRefreshToken as IDecodedToken).valid).toBe(false)
     })
   })
 
