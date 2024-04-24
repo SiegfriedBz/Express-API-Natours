@@ -1,10 +1,11 @@
 import 'dotenv/config'
 import config from 'config'
 import Stripe from 'stripe'
-const stripe = new Stripe(config.get<string>('stripe.stripePrivateKey'))
 import type { Request } from 'express'
 import type { IUserDocument } from '../types/user.types'
 import type { ITourDocument } from '../types/tour.types'
+
+const stripe = new Stripe(config.get<string>('stripe.stripePrivateKey'))
 
 type TProps = {
   req: Request

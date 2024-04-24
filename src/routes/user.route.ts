@@ -1,13 +1,14 @@
 import express from 'express'
 import {
   createUserHandler,
-  forgotMyPasswordHandler,
   getAllUsersHandler,
-  getMeHandler,
   getUserHandler,
+  getMeHandler,
+  forgotMyPasswordHandler,
   resetMyPasswordHandler,
   updateMeHandler,
   updateMyPasswordHandler,
+  fakeDeleteMeHandler,
   updateUserHandler
 } from '../controllers/user.controller'
 import validateRequest from '../middleware/validateRequest'
@@ -52,6 +53,9 @@ router
     resizeImages,
     updateMeHandler
   )
+
+router.route('/delete-me').patch(fakeDeleteMeHandler)
+
 router
   .route('/update-my-password') // only password
   .patch(validateRequest(updateMyPasswordZodSchema), updateMyPasswordHandler)

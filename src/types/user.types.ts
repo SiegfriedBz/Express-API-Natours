@@ -10,6 +10,7 @@ export interface IUserDBInput {
   role: TUserRole
 }
 export interface IUserDocument extends IUserDBInput, mongoose.Document {
+  isActive: boolean
   createdAt: Date
   updatedAt: Date
   passwordChangedAt: Date

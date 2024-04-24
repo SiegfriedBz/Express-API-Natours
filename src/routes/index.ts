@@ -5,7 +5,8 @@ import sessionRoutes from './session.route'
 import tourRoutes from './tour.route'
 import reviewRoutes from './review.route'
 import bookingRoutes from './booking.route'
-import type { Express, Request, Response } from 'express'
+import AppError from '../utils/AppError.utils'
+import type { Express, NextFunction, Request, Response } from 'express'
 
 export default function routes(app: Express) {
   app.use(logCurrentRoute)
@@ -21,4 +22,14 @@ export default function routes(app: Express) {
   app.use('/api/v1/tours', tourRoutes)
   app.use('/api/v1/reviews', reviewRoutes)
   app.use('/api/v1/bookings', bookingRoutes)
+
+  // All catch route
+  app.all('*', (req: Request, res: Response, next: NextFunction) => {
+    next(
+      new AppError({
+        statusCode: 404,
+        message: `No route match ${req.originalUrl} on this server`
+      })
+    )
+  })
 }

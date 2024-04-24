@@ -40,7 +40,8 @@ const updateMeZodSchema = z.object({
     .object({
       name: z.string().optional(),
       email: z.string().email().optional(),
-      photo: z.string().optional()
+      photo: z.string().optional(),
+      isActive: z.boolean().optional()
     })
     .refine((data) => !data?.name || data.name != null, {
       message: 'User name can not be null',
@@ -90,6 +91,7 @@ const forgotMyPasswordZodSchema = z.object({
       .email('Not a valid email')
   })
 })
+
 // User - Reset my password
 const resetMyPasswordZodSchema = z.object({
   body: z
@@ -138,7 +140,6 @@ type TUpdateMeInput = z.TypeOf<typeof updateMeZodSchema>
 type TUpdateMyPasswordInput = z.TypeOf<typeof updateMyPasswordZodSchema>
 type TForgotMyPasswordInput = z.TypeOf<typeof forgotMyPasswordZodSchema>
 type TResetMyPasswordInput = z.TypeOf<typeof resetMyPasswordZodSchema>
-
 type TAdminUpdateUserInput = z.TypeOf<typeof adminUpdateUserZodSchema>
 
 export {

@@ -18,24 +18,45 @@ const METER_TO = {
   km: 0.001
 }
 
+/**
+ * Service function to get all tours based on the provided query parameters.
+ * @param query - The query parameters.
+ * @returns A promise that resolves to an array of tours.
+ */
 export async function getAllTours(query: ExpressQuery) {
   const tours = await queryBuilderService<ITourDocument>({ query, Model: Tour })
 
   return tours
 }
 
+/**
+ * Service function to get a tour by its ID.
+ * @param tourId - The ID of the tour.
+ * @returns A promise that resolves to the tour.
+ */
 export async function getTour(tourId: string) {
   const tour = await Tour.findById(tourId)
 
   return tour
 }
 
+/**
+ * Service function to create a new tour.
+ * @param inputData - The data for the new tour.
+ * @returns A promise that resolves to the newly created tour.
+ */
 export async function createTour(inputData: TCreateTourInput['body']) {
   const newTour = await Tour.create(inputData)
 
   return newTour
 }
 
+/**
+ * Service function to update a tour.
+ * @param filter - The filter to find the tour to update.
+ * @param update - The update data for the tour.
+ * @returns A promise that resolves to the updated tour.
+ */
 export async function updateTour(
   filter: FilterQuery<ITourDocument>,
   update: UpdateQuery<TUpdateTourInput['body']>
@@ -45,14 +66,20 @@ export async function updateTour(
   return newTour
 }
 
+/**
+ * Service function to delete a tour.
+ * @param tourId - The ID of the tour to delete.
+ * @returns A promise that resolves to the deleted tour.
+ */
 export async function deleteTour(tourId: string) {
   const deletedTour = await Tour.findByIdAndDelete(tourId)
 
   return deletedTour
 }
 
-/** Stats */
-// Tours' stats
+/**
+ * Type representing the statistics of tours.
+ */
 type TStats = {
   _id: string
   avgRating: number
@@ -63,6 +90,10 @@ type TStats = {
   totalToursCount: number
 }[]
 
+/**
+ * Service function to get the statistics of tours.
+ * @returns A promise that resolves to an array of tour statistics.
+ */
 export async function getToursStats(): Promise<TStats> {
   const stats = await Tour.aggregate([
     { $match: { ratingsAverage: { $gte: 4.5 } } },
@@ -87,13 +118,20 @@ export async function getToursStats(): Promise<TStats> {
   return stats
 }
 
-// Tours' monthly stats
+/**
+ * Type representing the monthly statistics of tours.
+ */
 type TMonthlyStats = {
   month: number
   toursStartcount: number
   tours: string[]
 }[]
 
+/**
+ * Service function to get the monthly statistics of tours.
+ * @param year - The year for which to get the statistics.
+ * @returns A promise that resolves to an array of monthly tour statistics.
+ */
 export async function getMonthlyStats(year: number): Promise<TMonthlyStats> {
   const stats = await Tour.aggregate([
     { $unwind: '$startDates' },
@@ -107,28 +145,23 @@ export async function getMonthlyStats(year: number): Promise<TMonthlyStats> {
     },
     {
       $group: {
-        _id: { $month: '$startDates' }, // extract the month of this date and set this month as a key for this group
+        _id: { $month: '$startDates' },
         toursStartcount: { $sum: 1 },
         tours: {
-          // create an array and push each Tour.name
           $push: '$name'
         }
       }
     },
     {
-      // add a key
       $addFields: {
-        month: '$_id' // add a month key wich value is id from previous stage
+        month: '$_id'
       }
     },
-
     {
-      // remove a key
       $project: {
-        _id: 0 // remove the key _id
+        _id: 0
       }
     },
-
     {
       $sort: { toursStartcount: -1 } // DESC ORDER
     }
@@ -136,19 +169,25 @@ export async function getMonthlyStats(year: number): Promise<TMonthlyStats> {
   return stats
 }
 
-/** Geo */
+/**
+ * Type representing the properties for getting tours within a certain distance.
+ */
 type TGetToursWithinProps = {
   distance: string
   latlng: string
   unit: string
 }
 
+/**
+ * Service function to get tours within a certain distance from a given location.
+ * @param props - The properties for getting tours within a certain distance.
+ * @returns A promise that resolves to an array of tours.
+ */
 export async function getToursWithin({
   distance,
   latlng,
   unit
 }: TGetToursWithinProps) {
-  // radiant
   const radius = Number(distance) / EARTH_RADIUS[unit === 'mi' ? 'mi' : 'km']
 
   const [lat, lng] = latlng.split(',')
@@ -170,13 +209,24 @@ export async function getToursWithin({
   return tours
 }
 
-// Get Distances to tours from a point
+/**
+ * Type representing the properties for getting distances to tours from a point.
+ */
 type TGetDistancesProps = {
   latlng: string
   unit: string
 }
+
+/**
+ * Type representing the distances to tours from a point.
+ */
 type TDistances = { distance: number; name: string }[] | null
 
+/**
+ * Service function to get the distances to tours from a given point.
+ * @param props - The properties for getting distances to tours.
+ * @returns A promise that resolves to an array of distances to tours.
+ */
 export async function getDistances({
   latlng,
   unit
@@ -194,9 +244,6 @@ export async function getDistances({
 
   const distances = await Tour.aggregate([
     {
-      // $geoNear MUST be 1st stage in pipeline
-      // $geoNear need tourSchema.index({ startLocation: "2dsphere" })
-      //  => will use startLocation as starting point for distances
       $geoNear: {
         near: {
           type: 'Point',
