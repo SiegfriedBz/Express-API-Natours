@@ -13,7 +13,11 @@ import {
   sendWelcomeEmail,
   sendForgotMyPasswordEmail
 } from '../services/email.service'
-import { createSession, generateTokens } from '../services/session.service'
+import {
+  createSession,
+  generateTokens,
+  updateSession
+} from '../services/session.service'
 import setTokenCookieOptions from '../utils/setTokenCookieOptions.utils'
 import AppError from '../utils/AppError.utils'
 import logger from '../utils/logger.utils'
@@ -277,8 +281,9 @@ export const updateMyPasswordHandler = async (
       )
     }
 
-    // 2. Hash submittedNewPassword on save user
+    // 2. Hash submittedNewPassword on save user & set isActive
     user.password = submittedNewPassword
+    user.isActive = true
     await user.save()
 
     // 3. Remove password from user
@@ -299,6 +304,52 @@ export const updateMyPasswordHandler = async (
     next(err)
   }
 }
+
+/** */
+export const fakeDeleteMeHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // after deserializeAndRefreshUser - requireUser
+    const currentUserId = res.locals.user._id
+    const sessionId = res.locals.sessionId
+
+    // Update session
+    await updateSession({ _id: sessionId }, { isValid: false })
+
+    // Update user
+    const updatedUser = await updateUser(
+      { _id: currentUserId },
+      { isActive: false }
+    )
+
+    if (!updatedUser) {
+      return next(
+        new AppError({
+          statusCode: 500,
+          message: 'Something went wrong while updating user'
+        })
+      )
+    }
+
+    // Kill cookies
+    res.cookie('accessToken', '', setTokenCookieOptions())
+    res.cookie('refreshToken', '', setTokenCookieOptions())
+
+    // Send response
+    return res.status(200).json({
+      status: 'success',
+      data: { user: updatedUser }
+    })
+  } catch (err: unknown) {
+    logger.error(err)
+    next(err)
+  }
+}
+
+/** */
 
 /** Protected
  *  Admin
