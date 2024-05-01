@@ -3,13 +3,10 @@ import setQueryFilterByTourId from '../middleware/setQueryFilterByTourId'
 import {
   getAllBookingsHandler,
   getBookingHandler,
-  createBookingOnTourHandler,
   getStripeCheckoutSessionHandler
 } from '../controllers/booking.controller'
 import restrictToRole from '../middleware/restrictToRole'
 import requireUser from '../middleware/requireUser'
-import validateRequest from '../middleware/validateRequest'
-import { createBookingZodSchema } from '../zodSchema/booking.zodSchema'
 
 /** Preserve the req.params values from the parent router.*/
 const router = express.Router({ mergeParams: true })
@@ -29,10 +26,6 @@ router
    * GET /api/v1/tours/:id/bookings
    */
   .get(restrictToRole('admin'), setQueryFilterByTourId, getAllBookingsHandler)
-  /** Handle
-   * POST /api/v1/tours/:id/bookings
-   */
-  .post(validateRequest(createBookingZodSchema), createBookingOnTourHandler)
 
 /** Handle
  * GET /api/v1/bookings/:bookingId

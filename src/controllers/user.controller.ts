@@ -1,3 +1,4 @@
+import config from 'config'
 import { omit } from 'lodash'
 import {
   createUser,
@@ -46,7 +47,11 @@ export const createUserHandler = async (
 
     if (user) {
       /** 2. Send Welcome email */
-      const url = `${req.protocol}://${req.get('host')}/me`
+      const refererUrl =
+        req.get('referer') || config.get<string>('cors.allowedOrigins')
+      const origin = new URL(refererUrl as string).origin
+      const url = `${origin}/me`
+
       await sendWelcomeEmail({ user, url })
     }
 
@@ -79,9 +84,12 @@ export const forgotMyPasswordHandler = async (
       await setPasswordResetToken(email)
 
     /** 2. Send Email with Reset Token / Link */
-    const url = `${req.protocol}://${req.get(
-      'host'
-    )}/reset-my-password/${resetToken}`
+    // Extract the Referer header from the request
+    const refererUrl =
+      req.get('referer') || config.get<string>('cors.allowedOrigins')
+    const origin = new URL(refererUrl as string).origin
+    const url = `${origin}/resetMyPassword-2/2/${resetToken}`
+
     await sendForgotMyPasswordEmail({ user, url })
 
     /** 3. Send response */
@@ -168,7 +176,7 @@ export const getMeHandler = async (
   try {
     const currentUserId = res.locals.user._id
 
-    const currentUser = await getUser(currentUserId)
+    const currentUser = await getUser({ userId: currentUserId })
 
     if (!currentUser) {
       return next(
@@ -370,7 +378,7 @@ export const updateUserHandler = async (
     } = req
 
     // Check user exists
-    const user = await getUser(userId)
+    const user = await getUser({ userId })
 
     if (!user) {
       return next(new AppError({ statusCode: 404, message: 'User not found' }))
@@ -426,7 +434,7 @@ export const getUserHandler = async (
       params: { userId }
     } = req
 
-    const user = await getUser(userId)
+    const user = await getUser({ userId })
 
     if (!user) {
       return next(

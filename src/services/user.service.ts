@@ -168,10 +168,19 @@ export async function getAllUsers(): Promise<TUserWithoutPassword[] | null> {
  * @param userId - The ID of the user.
  * @returns The user without the password field.
  */
-export async function getUser(
-  userId: string
-): Promise<TUserWithoutPassword | null> {
-  const user = await User.findById(userId).select('-password')
+type TGetUserProps = {
+  userId?: string
+  userEmail?: string
+}
+export async function getUser({
+  userId,
+  userEmail
+}: TGetUserProps): Promise<TUserWithoutPassword | null> {
+  const query = userEmail
+    ? User.findOne({ email: userEmail })
+    : User.findById(userId)
+
+  const user = await query.select('-password')
 
   return user
 }

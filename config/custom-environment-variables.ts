@@ -24,7 +24,8 @@ export default {
   },
   stripe: {
     stripePrivateKey: 'STRIPE_PRIVATE_KEY',
-    stripePublicKey: 'STRIPE_PUBLIC_KEY'
+    stripePublicKey: 'STRIPE_PUBLIC_KEY',
+    stripeWebhookEndpointSecret: 'STRIPE_WEBHOOK_ENDPOINT_SECRET'
   },
   tokens: {
     passwordResetToken: {

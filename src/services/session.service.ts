@@ -102,7 +102,7 @@ export async function reIssueAccessToken(
   }
 
   // 2.1 Check if user on refreshToken still exist
-  const user = await getUser(session.user)
+  const user = await getUser({ userId: session.user })
   if (!user) {
     return null
   }

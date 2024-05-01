@@ -178,7 +178,7 @@ describe('User routes', () => {
               name: user?.name,
               email: user?.email
             }),
-            url: expect.any(String)
+            url: expect.stringContaining('/resetMyPassword-2/2/')
           })
         )
 

@@ -46,12 +46,49 @@ describe('Session routes', () => {
           tokenType: 'accessToken'
         })
         expect((decodedAccessToken as IDecodedToken).valid).toBe(true)
+        expect(decodedAccessToken).toEqual(
+          expect.objectContaining({
+            valid: true,
+            decoded: expect.objectContaining({
+              user: expect.objectContaining({
+                _id: user?._id.toString(),
+                name: user?.name,
+                email: user?.email
+              })
+            })
+          })
+        )
 
         const decodedRefreshToken = verifyJWT({
           token: refreshToken as string,
           tokenType: 'refreshToken'
         })
-        expect((decodedRefreshToken as IDecodedToken).valid).toBe(true)
+        expect(decodedRefreshToken).toEqual(
+          expect.objectContaining({
+            valid: true,
+            decoded: expect.objectContaining({
+              user: expect.objectContaining({
+                _id: user?._id.toString(),
+                name: user?.name,
+                email: user?.email
+              })
+            })
+          })
+        )
+
+        // Check Response
+        expect(body).toEqual(
+          expect.objectContaining({
+            status: 'success',
+            data: expect.objectContaining({
+              user: expect.objectContaining({
+                _id: user?._id.toString(),
+                name: user?.name,
+                email: user?.email
+              })
+            })
+          })
+        )
       })
     })
 

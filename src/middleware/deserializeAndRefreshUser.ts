@@ -64,12 +64,7 @@ export default async function deserializeAndRefreshUser(
     const { freshAccessToken, user, sessionId } = fresh
 
     // 4. Set cookie
-    res.cookie(
-      'accessToken',
-      freshAccessToken,
-      setTokenCookieOptions()
-      // 'accessToken'
-    )
+    res.cookie('accessToken', freshAccessToken, setTokenCookieOptions())
 
     // 5. Attach data to res.locals
     res.locals.user = user

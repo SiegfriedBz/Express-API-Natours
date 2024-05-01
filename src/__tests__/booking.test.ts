@@ -32,7 +32,7 @@ describe('Bookings routes', () => {
     })
 
     describe('When Admin is logged in', () => {
-      it('should send 200 + array of bookings', async () => {
+      it('should send 200 + array of bookings with populated user and tour', async () => {
         const admin = await createUserAs({ as: 'admin' })
         const { accessTokenCookie: adminAccessTokenCookie } = await loginAs({
           asDocument: admin,
@@ -52,8 +52,15 @@ describe('Bookings routes', () => {
               bookings: expect.arrayContaining([
                 expect.objectContaining({
                   price: expect.any(Number),
-                  user: expect.any(String),
-                  tour: expect.any(String)
+                  user: expect.objectContaining({
+                    _id: expect.any(String),
+                    name: expect.any(String)
+                  }),
+                  tour: expect.objectContaining({
+                    _id: expect.any(String),
+                    name: expect.any(String),
+                    price: expect.any(Number)
+                  })
                 })
               ])
             })
@@ -126,9 +133,16 @@ describe('Bookings routes', () => {
             data: expect.objectContaining({
               bookings: expect.arrayContaining([
                 expect.objectContaining({
-                  user: booker?._id.toString(),
-                  tour: tour?._id.toString(),
-                  price: tour?.price
+                  price: expect.any(Number),
+                  user: expect.objectContaining({
+                    _id: expect.any(String),
+                    name: expect.any(String)
+                  }),
+                  tour: expect.objectContaining({
+                    _id: expect.any(String),
+                    name: expect.any(String),
+                    price: expect.any(Number)
+                  })
                 })
               ])
             })
@@ -191,9 +205,16 @@ describe('Bookings routes', () => {
             status: 'success',
             data: expect.objectContaining({
               booking: expect.objectContaining({
-                user: booker?._id.toString(),
-                tour: tour?._id.toString(),
-                price: tour?.price
+                price: expect.any(Number),
+                user: expect.objectContaining({
+                  _id: expect.any(String),
+                  name: expect.any(String)
+                }),
+                tour: expect.objectContaining({
+                  _id: expect.any(String),
+                  name: expect.any(String),
+                  price: expect.any(Number)
+                })
               })
             })
           })
@@ -218,9 +239,16 @@ describe('Bookings routes', () => {
             status: 'success',
             data: expect.objectContaining({
               booking: expect.objectContaining({
-                user: booker?._id.toString(),
-                tour: tour?._id.toString(),
-                price: tour?.price
+                price: expect.any(Number),
+                user: expect.objectContaining({
+                  _id: expect.any(String),
+                  name: expect.any(String)
+                }),
+                tour: expect.objectContaining({
+                  _id: expect.any(String),
+                  name: expect.any(String),
+                  price: expect.any(Number)
+                })
               })
             })
           })
@@ -287,9 +315,6 @@ describe('Bookings routes', () => {
               stripeSession: expect.objectContaining({
                 id: expect.any(String),
                 object: 'checkout.session',
-                cancel_url: expect.stringMatching(
-                  new RegExp(`tour/${tour?.slug}`)
-                ),
                 client_reference_id: expect.any(String),
                 created: expect.any(Number),
                 currency: 'usd',
@@ -300,10 +325,9 @@ describe('Bookings routes', () => {
                 mode: 'payment',
                 payment_status: 'unpaid',
                 status: 'open',
-                success_url: expect.stringMatching(
-                  new RegExp(
-                    `tourId=${tour?._id.toString()}&userId=${user?._id.toString()}`
-                  )
+                success_url: expect.stringMatching(new RegExp(`my-bookings`)),
+                cancel_url: expect.stringMatching(
+                  new RegExp(`\\/tours\\/${tour?._id.toString()}`)
                 ),
                 ui_mode: 'hosted',
                 url: expect.any(String)

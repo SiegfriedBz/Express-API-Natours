@@ -16,7 +16,9 @@ export default {
     stripePrivateKey:
       'sk_test_51OATwgGyO055z3D9eOYJ73jSMWPYmaMdin20BMynmAPGEv2DwLP57ctckumiJoaYznVp1DmMLQu5uF8ADWtJldjx00mPdzCceU',
     stripePublicKey:
-      'pk_test_51OATwgGyO055z3D9vjQz2YQXdxrmvqMP7aQpGTfVEyurUFVNDtDLIdhMnPFRJmCabQiYFFQ0Lrkz3TLBioAo1QIk00bKqGaT8C'
+      'pk_test_51OATwgGyO055z3D9vjQz2YQXdxrmvqMP7aQpGTfVEyurUFVNDtDLIdhMnPFRJmCabQiYFFQ0Lrkz3TLBioAo1QIk00bKqGaT8C',
+    stripeWebhookEndpointSecret:
+      'whsec_f9c40bcdb5dbf50095b4fbb4b60e44bb52a6965ad3baaf84e6eb5b7fd51984c6'
   },
   tokens: {
     passwordResetToken: {

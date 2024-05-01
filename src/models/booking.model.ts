@@ -23,4 +23,20 @@ const bookingSchema = new mongoose.Schema(
   { timestamps: true }
 )
 
+/** Hooks */
+/** Query pre Hook - this : current Query instance */
+bookingSchema.pre(/^find/, function (next) {
+  ;(this as mongoose.Query<IBookingDocument[], IBookingDocument>)
+    .populate({
+      path: 'user',
+      select: 'name photo'
+    })
+    .populate({
+      path: 'tour',
+      select: 'name price'
+    })
+
+  next()
+})
+
 export default mongoose.model<IBookingDocument>('Booking', bookingSchema)

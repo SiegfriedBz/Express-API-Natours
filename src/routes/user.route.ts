@@ -11,6 +11,7 @@ import {
   fakeDeleteMeHandler,
   updateUserHandler
 } from '../controllers/user.controller'
+import { getMyBookingsHandler } from '../controllers/booking.controller'
 import validateRequest from '../middleware/validateRequest'
 import requireUser from '../middleware/requireUser'
 import restrictToRole from '../middleware/restrictToRole'
@@ -59,6 +60,13 @@ router.route('/delete-me').patch(fakeDeleteMeHandler)
 router
   .route('/update-my-password') // only password
   .patch(validateRequest(updateMyPasswordZodSchema), updateMyPasswordHandler)
+
+router
+  .route('/my-bookings')
+  /** Handle
+   * GET /api/v1/users/my-bookings
+   */
+  .get(getMyBookingsHandler)
 
 /** Admin-protected routes */
 router.use(restrictToRole('admin'))

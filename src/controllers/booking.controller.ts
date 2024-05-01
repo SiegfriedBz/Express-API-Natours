@@ -1,7 +1,7 @@
 import {
-  createBookingOnTour,
   getAllBookings,
-  getBooking
+  getBooking,
+  getMyBookings
 } from '../services/booking.service'
 import { getTour } from '../services/tour.service'
 import { getStripeCheckoutSession } from '../services/stripe.service'
@@ -10,7 +10,6 @@ import logger from '../utils/logger.utils'
 import type { Request, Response, NextFunction } from 'express'
 import type { TQueryFilterByTourId } from '../middleware/setQueryFilterByTourId'
 import type { IBookingDocument } from '../types/booking.types'
-import type { TCreateBookingInput } from '../zodSchema/booking.zodSchema'
 
 /** GET Stripe Session */
 /**
@@ -52,46 +51,6 @@ export const getStripeCheckoutSessionHandler = async (
       stripeSession
     }
   })
-}
-
-/**
- * Creates a booking for a tour.
- *
- * @param req - The request object containing the tour ID in the params.
- * @param res - The response object.
- * @param next - The next function to call in the middleware chain.
- * @returns A JSON response with the newly created booking.
- */
-export const createBookingOnTourHandler = async (
-  req: Request<TCreateBookingInput['params'], object, object>,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { params } = req
-
-    const tourId = params.id
-    const userId = res.locals.user._id
-
-    // 1. Get Tour
-    const tour = await getTour(tourId)
-    if (!tour) {
-      return next(new AppError({ statusCode: 404, message: 'Tour not found' }))
-    }
-
-    const tourPrice = tour.price
-
-    // 2. Create Booking
-    const newBooking = await createBookingOnTour({ tourId, tourPrice, userId })
-
-    return res.status(201).json({
-      status: 'success',
-      data: { booking: newBooking }
-    })
-  } catch (err: unknown) {
-    logger.error(err)
-    next(err)
-  }
 }
 
 /**
@@ -178,7 +137,7 @@ export async function getBookingHandler(
     const userIsAdmin = currentUserRole === 'admin'
 
     // 3. Checks if the current user is the booker of this booking
-    const userIsBooker = booking.user.toString() === currentUserId
+    const userIsBooker = booking.user._id.toString() === currentUserId
 
     if (!userIsAdmin && !userIsBooker) {
       return next(
@@ -197,5 +156,27 @@ export async function getBookingHandler(
   } catch (error) {
     logger.info(error)
     next(error)
+  }
+}
+
+//
+export async function getMyBookingsHandler(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const userId = res.locals.user._id
+
+    const bookings: IBookingDocument[] = await getMyBookings(userId)
+
+    return res.status(200).json({
+      status: 'success',
+      dataCount: bookings?.length,
+      data: { bookings }
+    })
+  } catch (err: unknown) {
+    logger.error(err)
+    next(err)
   }
 }

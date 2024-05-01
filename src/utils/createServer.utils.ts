@@ -4,6 +4,7 @@ import express, { Express } from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import routes from '../routes'
+// import logger from './logger.utils'
 
 export default function createServer(): Express {
   const app = express()
@@ -18,8 +19,9 @@ export default function createServer(): Express {
       credentials: true
     })
   )
+
   app.use(cookieParser())
-  app.use(express.json())
+  app.use(express.static('public'))
 
   routes(app)
 
