@@ -1,5 +1,7 @@
 export default {
-  cors: { allowedOrigins: 'http://localhost:3000' },
+  cors: {
+    allowedOrigins: 'http://localhost:3000'
+  },
 
   bcrypt: { saltWorkFactor: 10 },
   // cookies: {
