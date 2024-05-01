@@ -1,5 +1,7 @@
+import express from 'express'
 import logCurrentRoute from '../middleware/logCurrentRoute'
 import deserializeAndRefreshUser from '../middleware/deserializeAndRefreshUser'
+import stripeWebhookRoute from './stripe.webhook.route'
 import userRoutes from './user.route'
 import sessionRoutes from './session.route'
 import tourRoutes from './tour.route'
@@ -10,6 +12,16 @@ import type { Express, NextFunction, Request, Response } from 'express'
 
 export default function routes(app: Express) {
   app.use(logCurrentRoute)
+
+  // stripe webhook
+  app.use(
+    '/stripe/webhook',
+    express.raw({ type: 'application/json' }),
+    stripeWebhookRoute
+  )
+
+  // parse json only if not stripe webhook
+  app.use(express.json())
 
   app.use(deserializeAndRefreshUser)
 
