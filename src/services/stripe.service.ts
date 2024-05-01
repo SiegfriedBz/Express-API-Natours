@@ -6,6 +6,9 @@ import type { IUserDocument } from '../types/user.types'
 import type { ITourDocument } from '../types/tour.types'
 
 const stripe = new Stripe(config.get<string>('stripe.stripePrivateKey'))
+const stripeWebhookEndpointSecret = config.get<string>(
+  'stripe.stripeWebhookEndpointSecret'
+)
 
 type TProps = {
   req: Request
@@ -23,24 +26,27 @@ type TProps = {
  */
 
 export const getStripeCheckoutSession = async ({ req, user, tour }: TProps) => {
-  const userId = user._id.toString()
   const userEmail = user.email
 
   const tourId = tour._id.toString()
   const {
     price: tourPrice,
     name: tourName,
-    slug: tourSlug,
+    // slug: tourSlug,
     summary: tourSummary
   } = tour
+
+  const refererUrl =
+    req.get('referer') || config.get<string>('cors.allowedOrigins')
+  const origin = new URL(refererUrl as string).origin
 
   const stripeSession = await stripe?.checkout?.sessions?.create({
     payment_method_types: ['card'],
     mode: 'payment',
-    success_url: `${req.protocol}://${req.get(
-      'host'
-    )}/?tourId=${tourId}&userId=${userId}&price=${tourPrice}`,
-    cancel_url: `${req.protocol}://${req.get('host')}/tour/${tourSlug || 'tour-XXX'}`,
+    // success_url: `${origin}/bookings?tourId=${tourId}&userId=${userId}&price=${tourPrice}`,
+    success_url: `${origin}/my-bookings`,
+    // cancel_url: `${origin}/tours/${tourSlug}`,
+    cancel_url: `${origin}/tours/${tourId}`,
     customer_email: userEmail,
     client_reference_id: tourId,
     line_items: [
@@ -63,4 +69,23 @@ export const getStripeCheckoutSession = async ({ req, user, tour }: TProps) => {
   })
 
   return stripeSession
+}
+
+/**
+ * Retrieves the Stripe webhook event from the provided request body and signature.
+ * @param body - The request body containing the event data.
+ * @param stripeSignature - The signature of the webhook event.
+ * @returns The retrieved Stripe webhook event.
+ */
+export const getStripeWebhookEvent = (
+  body: 'string | Buffer',
+  stripeSignature: string
+) => {
+  const event = stripe.webhooks.constructEvent(
+    body,
+    stripeSignature,
+    stripeWebhookEndpointSecret
+  )
+
+  return event
 }
