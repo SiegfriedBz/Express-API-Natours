@@ -42,27 +42,41 @@ export async function getBooking(
 
 /**
  * Creates a new booking on a tour.
+ * Initiated in stripe checkout webhook
  * @param {TCreateBookingOnTourProps} props - The properties for creating a booking on a tour.
+ * @param {string} props.userId - The ID of the user making the booking.
  * @param {string} props.tourId - The ID of the tour.
  * @param {number} props.tourPrice - The price of the tour.
- * @param {string} props.userId - The ID of the user making the booking.
  * @returns {Promise<IBookingDocument | null>} - A promise that resolves to the created booking document, or null if not created.
  */
-type TCreateBookingOnTourProps = {
+export type TCreateBookingOnTourProps = {
+  userId: string
   tourId: string
   tourPrice: number
-  userId: string
 }
 export async function createBookingOnTour({
+  userId,
   tourId,
-  tourPrice,
-  userId
+  tourPrice
 }: TCreateBookingOnTourProps): Promise<IBookingDocument | null> {
   const newBooking = await Booking.create({
+    user: userId,
     price: tourPrice,
-    tour: tourId,
-    user: userId
+    tour: tourId
   })
 
   return newBooking
+}
+
+/**
+ * Retrieves bookings for a specific user.
+ * @param userId - The ID of the user.
+ * @returns A promise that resolves to an array of booking documents.
+ */
+export async function getMyBookings(
+  userId: string
+): Promise<IBookingDocument[]> {
+  const bookings = await Booking.find({ user: userId })
+
+  return bookings
 }
