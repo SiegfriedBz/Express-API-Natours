@@ -24,3 +24,19 @@ export interface ITourDocument extends ITourDBInput, mongoose.Document {
   createdAt: Date
   updatedAt: Date
 }
+
+export type TTourStats = {
+  _id: 'easy' | 'medium' | 'hard' // Assuming TOUR_DIFFICULTY is an array containing these strings
+  avgRating: number
+  avgPrice: number
+  minPrice: number
+  maxPrice: number
+  totalRatingsCount: number
+  totalToursCount: number
+}
+
+export type TMonthlyStats = {
+  toursStartCount: number
+  tours: string[]
+  month: number
+}
