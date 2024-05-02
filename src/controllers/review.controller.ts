@@ -69,7 +69,7 @@ export async function getReviewHandler(
       params: { reviewId }
     } = req
 
-    const review = await getReview(reviewId)
+    const review = await getReview({ _id: reviewId })
 
     if (!review) {
       return next(
@@ -89,9 +89,8 @@ export async function getReviewHandler(
   }
 }
 
-// TODO ADD ALL CHECKS IN MIDDLEWARE
 /** Protected
- *  User who booked a tour && left 0 review on this tour
+ *  User who booked the tour && left 0 review on this tour
  */
 /**
  * Creates a new review on a tour.
@@ -124,7 +123,6 @@ export async function createReviewOnTourHandler(
   }
 }
 
-// TODO ADD ALL CHECKS IN MIDDLEWARE
 /** Protected
  *  User who booked a tour && left this review on this tour
  */

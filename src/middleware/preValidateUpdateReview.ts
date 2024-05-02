@@ -32,7 +32,7 @@ export default async function preValidateUpdateReview(
     const currentUserId: string = res.locals.user._id // after requireUser
 
     // 1. Checks if the review exists.
-    const review: IReviewDocument | null = await getReview(reviewId)
+    const review: IReviewDocument | null = await getReview({ _id: reviewId })
 
     if (!review) {
       return next(

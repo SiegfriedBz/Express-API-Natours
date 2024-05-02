@@ -164,23 +164,14 @@ export async function getAllUsers(): Promise<TUserWithoutPassword[] | null> {
 }
 
 /**
- * Retrieves a user by ID.
- * @param userId - The ID of the user.
- * @returns The user without the password field.
+ * Retrieves a user based on the provided filter.
+ * @param filter - The filter query to find the user.
+ * @returns A promise that resolves to the user object without the password field, or null if no user is found.
  */
-type TGetUserProps = {
-  userId?: string
-  userEmail?: string
-}
-export async function getUser({
-  userId,
-  userEmail
-}: TGetUserProps): Promise<TUserWithoutPassword | null> {
-  const query = userEmail
-    ? User.findOne({ email: userEmail })
-    : User.findById(userId)
-
-  const user = await query.select('-password')
+export async function getUser(
+  filter: FilterQuery<IUserDocument>
+): Promise<TUserWithoutPassword | null> {
+  const user = await User.findOne(filter).select('-password')
 
   return user
 }
