@@ -4,6 +4,8 @@ import logger from '../utils/logger.utils'
 import type { Request, Response, NextFunction } from 'express'
 import type { TCreateReviewInput } from '../zodSchema/review.zodSchema'
 import type { ITourDocument } from '../types/tour.types'
+import { getBooking } from '../services/booking.service'
+import { getReview } from '../services/review.service'
 
 /**
  * Validates and presets the data for creating a review.
@@ -46,9 +48,8 @@ export default async function preValidateAndPresetCreateReview(
       }
     }
 
-    // TODO
     // 2. Checks that the current user has booked the tour.
-    const userHasBooked = true
+    const userHasBooked = await getBooking({ user: userId, tour: tourId })
     if (!userHasBooked) {
       return next(
         new AppError({
@@ -58,7 +59,18 @@ export default async function preValidateAndPresetCreateReview(
       )
     }
 
-    // 3. Appends the user ID and tour ID to the request body for the next middleware
+    // 3. Checks that the current user did not already review the tour.
+    const userDidReview = await getReview({ user: userId, tour: tourId })
+    if (userDidReview) {
+      return next(
+        new AppError({
+          statusCode: 403,
+          message: 'You can only review a tour once'
+        })
+      )
+    }
+
+    // 4. Appends the user ID and tour ID to the request body for the next middleware
     req.body = { ...req.body, user: userId, tour: tourId }
 
     next()

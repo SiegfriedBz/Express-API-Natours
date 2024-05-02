@@ -39,9 +39,9 @@ export async function getAllReviews({
  * @returns {Promise<IReviewDocument | null>} - A promise that resolves to the review document, or null if not found.
  */
 export async function getReview(
-  reviewId: string
+  filter: FilterQuery<IReviewDocument>
 ): Promise<IReviewDocument | null> {
-  const review = await Review.findById(reviewId)
+  const review = await Review.findOne(filter)
 
   return review
 }

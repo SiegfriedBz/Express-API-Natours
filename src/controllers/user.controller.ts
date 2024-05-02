@@ -176,7 +176,7 @@ export const getMeHandler = async (
   try {
     const currentUserId = res.locals.user._id
 
-    const currentUser = await getUser({ userId: currentUserId })
+    const currentUser = await getUser({ _id: currentUserId })
 
     if (!currentUser) {
       return next(
@@ -378,7 +378,7 @@ export const updateUserHandler = async (
     } = req
 
     // Check user exists
-    const user = await getUser({ userId })
+    const user = await getUser({ _id: userId })
 
     if (!user) {
       return next(new AppError({ statusCode: 404, message: 'User not found' }))
@@ -434,7 +434,7 @@ export const getUserHandler = async (
       params: { userId }
     } = req
 
-    const user = await getUser({ userId })
+    const user = await getUser({ _id: userId })
 
     if (!user) {
       return next(

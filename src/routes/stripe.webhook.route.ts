@@ -38,7 +38,7 @@ router
         checkoutSessionCompleted.amount_total / 100
 
       const userEmail = checkoutSessionCompleted.customer_email as string
-      const user = await getUser({ userEmail })
+      const user = await getUser({ email: userEmail })
       const userId = user?._id
 
       if (!userId || !tourId || !tourPrice) {

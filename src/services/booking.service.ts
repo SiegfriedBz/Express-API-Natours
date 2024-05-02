@@ -1,3 +1,4 @@
+import { FilterQuery } from 'mongoose'
 import Booking from '../models/booking.model'
 import { queryBuilderService } from '../utils/queryBuilder.service.utils'
 import type { Query as ExpressQuery } from 'express-serve-static-core'
@@ -28,14 +29,15 @@ export async function getAllBookings({
 }
 
 /**
- * Retrieves a booking by its ID.
- * @param {string} bookingId - The ID of the booking.
- * @returns {Promise<IBookingDocument | null>} - A promise that resolves to the booking document, or null if not found.
+ * Retrieves a booking document based on the provided filter.
+ *
+ * @param filter - The filter query to find the booking document.
+ * @returns A promise that resolves to the found booking document, or null if not found.
  */
 export async function getBooking(
-  bookingId: string
+  filter: FilterQuery<IBookingDocument>
 ): Promise<IBookingDocument | null> {
-  const booking = await Booking.findById(bookingId)
+  const booking = await Booking.findOne(filter)
 
   return booking
 }

@@ -12,6 +12,7 @@ import { generateReviewInput } from './fixtures/review/generateReviewInput.fixtu
 import type { IReviewDocument } from '../types/review.types'
 import type { IUserDocument } from '../types/user.types'
 import type { ITourDocument } from '../types/tour.types'
+import { createBooking } from './utils.ts/createBooking'
 
 const app = createServer()
 
@@ -83,7 +84,7 @@ describe('Reviews routes', () => {
     })
 
     describe('When review does NOT exist', () => {
-      it('should return 200 + correct review', async () => {
+      it('should return 404 + correct error message', async () => {
         const fakeReviewId = new mongoose.Types.ObjectId().toString()
 
         const { body } = await supertest(app)
@@ -120,58 +121,127 @@ describe('Reviews routes', () => {
           tour = await createTour()
         })
 
-        describe('When review input data is valid', () => {
-          it('should return 201 + the new review', async () => {
-            // Get inputData
-            const reviewInputData = generateReviewInput({
-              userId: user?._id,
-              tourId: tour?._id
+        describe('When user did book this tour', () => {
+          beforeEach(async () => {
+            await createBooking({
+              userId: (user as IUserDocument)._id,
+              tourId: (tour as ITourDocument)._id,
+              price: (tour as ITourDocument).price
+            })
+          })
+
+          describe('When user creates 1st review for this tour/booking', () => {
+            describe('When review input data is valid', () => {
+              it('should return 201 + the new review', async () => {
+                // Get inputData
+                const reviewInputData = generateReviewInput({
+                  userId: user?._id,
+                  tourId: tour?._id
+                })
+
+                // Create review on tour as User
+                const { body } = await supertest(app)
+                  .post(`/api/v1/tours/${tour?._id}/reviews`)
+                  .set('Cookie', userAccessTokenCookie)
+                  .send(reviewInputData)
+                  .expect(201)
+
+                expect(body).toEqual(
+                  expect.objectContaining({
+                    status: 'success',
+                    data: expect.objectContaining({
+                      review: expect.objectContaining({
+                        user: user?._id.toString(),
+                        tour: tour?._id.toString(),
+                        content: reviewInputData.content,
+                        rating: reviewInputData.rating
+                      })
+                    })
+                  })
+                )
+              })
             })
 
-            // Create review on tour as User
-            const { body } = await supertest(app)
-              .post(`/api/v1/tours/${tour?._id}/reviews`)
-              .set('Cookie', userAccessTokenCookie)
-              .send(reviewInputData)
-              .expect(201)
-
-            expect(body).toEqual(
-              expect.objectContaining({
-                status: 'success',
-                data: expect.objectContaining({
-                  review: expect.objectContaining({
-                    user: user?._id.toString(),
-                    tour: tour?._id.toString(),
-                    content: reviewInputData.content,
-                    rating: reviewInputData.rating
+            describe('When review input data is NOT valid', () => {
+              it('should return 400 + correct error message', async () => {
+                // Set INAVLID inputData
+                const invalidReviewInputData = {
+                  ...generateReviewInput({
+                    userId: user?._id,
+                    tourId: tour?._id
                   })
-                })
+                }
+                delete (invalidReviewInputData as { [key: string]: unknown })
+                  .content
+
+                // Create review on tour as User
+                const { body } = await supertest(app)
+                  .post(`/api/v1/tours/${tour?._id}/reviews`)
+                  .set('Cookie', userAccessTokenCookie)
+                  .send(invalidReviewInputData)
+                  .expect(400)
+
+                expect(body.status).toBe('fail')
+                expect(body.error.message).toBe('Review content is required')
               })
-            )
+            })
+          })
+
+          describe('When user already created a review for this tour/booking', () => {
+            describe('When review input data is valid', () => {
+              it('should return 403 + correct error message', async () => {
+                // Get inputData
+                const reviewInputData = generateReviewInput({
+                  userId: user?._id,
+                  tourId: tour?._id
+                })
+
+                // Create 1st review on tour as User
+                await supertest(app)
+                  .post(`/api/v1/tours/${tour?._id}/reviews`)
+                  .set('Cookie', userAccessTokenCookie)
+                  .send(reviewInputData)
+                  .expect(201)
+
+                // Create 2nd review on tour as User
+                const { body } = await supertest(app)
+                  .post(`/api/v1/tours/${tour?._id}/reviews`)
+                  .set('Cookie', userAccessTokenCookie)
+                  .send(reviewInputData)
+                  .expect(403)
+
+                expect(body.status).toBe('fail')
+                expect(body.error.message).toBe(
+                  'You can only review a tour once'
+                )
+              })
+            })
           })
         })
 
-        describe('When review input data is NOT valid', () => {
-          it('should return 400 + correct error message', async () => {
-            // Set INAVLID inputData
-            const invalidReviewInputData = {
-              ...generateReviewInput({
-                userId: user?._id,
-                tourId: tour?._id
+        describe('When user did NOT book this tour', () => {
+          describe('When user creates 1st review for this tour/booking', () => {
+            describe('When review input data is valid', () => {
+              it('should return 403 + correct error message', async () => {
+                // Get inputData
+                const reviewInputData = generateReviewInput({
+                  userId: user?._id,
+                  tourId: tour?._id
+                })
+
+                // Create review on tour as User
+                const { body } = await supertest(app)
+                  .post(`/api/v1/tours/${tour?._id}/reviews`)
+                  .set('Cookie', userAccessTokenCookie)
+                  .send(reviewInputData)
+                  .expect(403)
+
+                expect(body.status).toBe('fail')
+                expect(body.error.message).toBe(
+                  'You can only review a tour that you have booked'
+                )
               })
-            }
-            delete (invalidReviewInputData as { [key: string]: unknown })
-              .content
-
-            // Create review on tour as User
-            const { body } = await supertest(app)
-              .post(`/api/v1/tours/${tour?._id}/reviews`)
-              .set('Cookie', userAccessTokenCookie)
-              .send(invalidReviewInputData)
-              .expect(400)
-
-            expect(body.status).toBe('fail')
-            expect(body.error.message).toBe('Review content is required')
+            })
           })
         })
       })

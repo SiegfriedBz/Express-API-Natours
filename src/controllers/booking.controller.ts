@@ -125,7 +125,9 @@ export async function getBookingHandler(
     const currentUserRole: string = res.locals.user.role // after requireUser
 
     // 1. Checks if the booking exists.
-    const booking: IBookingDocument | null = await getBooking(bookingId)
+    const booking: IBookingDocument | null = await getBooking({
+      _id: bookingId
+    })
 
     if (!booking) {
       return next(
