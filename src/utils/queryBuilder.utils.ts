@@ -2,7 +2,7 @@
 import { FilterQuery, Query } from 'mongoose'
 import { Query as ExpressQuery } from 'express-serve-static-core'
 
-export const MAX_RESULTS_PER_PAGE = 10
+export const MAX_RESULTS_PER_PAGE = 4
 
 /**
  * A utility class for building queries using Mongoose.
@@ -43,7 +43,8 @@ class QueryBuilder<T> {
           } */
 
         if (
-          queryParamObject &&
+          typeof queryParamObject === 'object' &&
+          queryParamObject !== null &&
           ('lt' in queryParamObject ||
             'lte' in queryParamObject ||
             'gt' in queryParamObject ||
@@ -60,6 +61,10 @@ class QueryBuilder<T> {
             newObj[newKey] = queryParamObject[ObjKey]
           }
           ;(mongooseFilterQuery as Record<string, typeof newObj>)[key] = newObj
+        } else if (key === 'difficulty') {
+          // Handle 'difficulty' key specifically
+          ;(mongooseFilterQuery as Record<string, unknown>)[key] =
+            this.expressQueryObjInit[key]
         }
       }
     }
@@ -76,10 +81,12 @@ class QueryBuilder<T> {
       this.expressQueryObjInit.sort &&
       typeof this.expressQueryObjInit.sort === 'string'
     ) {
-      const sortBy = this.expressQueryObjInit.sort.split(',').join(' ')
-      this.mongooseQuery = this.mongooseQuery.sort(sortBy)
+      const sortBy = this.expressQueryObjInit.sort?.split(',')?.join(' ') || ''
+      if (sortBy) {
+        this.mongooseQuery = this.mongooseQuery.sort(sortBy)
+      }
     } else {
-      this.mongooseQuery = this.mongooseQuery.sort('-createdAt')
+      this.mongooseQuery = this.mongooseQuery.sort('-createdAt _id')
     }
 
     return this

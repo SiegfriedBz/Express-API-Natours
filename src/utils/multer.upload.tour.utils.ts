@@ -7,18 +7,23 @@ export const tourMulterNumberFields = [
   'discount'
 ]
 
+export const tourMulterObjectFields = [
+  'startLocation',
+  'startDates',
+  'locations',
+  'guides'
+]
+
 const tourMulterFields = [
   ...tourMulterNumberFields,
+  ...tourMulterObjectFields,
   'imageCover',
   'images',
   'name',
   'difficulty',
   'summary',
   'description',
-  'startDates',
-  'startLocation',
-  'locations',
-  'guides'
+  'startLocation'
 ]
 
 /**

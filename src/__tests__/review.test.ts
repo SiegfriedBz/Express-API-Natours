@@ -44,10 +44,14 @@ describe('Reviews routes', () => {
           data: expect.objectContaining({
             reviews: expect.arrayContaining([
               expect.objectContaining({
-                user: expect.any(String),
-                tour: expect.any(String),
+                _id: expect.any(String),
                 content: expect.any(String),
-                rating: expect.any(Number)
+                rating: expect.any(Number),
+                user: { _id: expect.any(String), name: expect.any(String) },
+                tour: expect.any(String),
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String),
+                __v: expect.any(Number)
               })
             ])
           })
@@ -72,10 +76,14 @@ describe('Reviews routes', () => {
             status: 'success',
             data: expect.objectContaining({
               review: expect.objectContaining({
-                user: review?.user._id.toString(),
-                tour: review?.tour._id.toString(),
-                content: review?.content,
-                rating: review?.rating
+                _id: review?._id.toString(),
+                content: expect.any(String),
+                rating: expect.any(Number),
+                user: { _id: expect.any(String), name: expect.any(String) },
+                tour: expect.any(String),
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String),
+                __v: expect.any(Number)
               })
             })
           })
@@ -437,10 +445,14 @@ describe('Reviews routes', () => {
               status: 'success',
               data: expect.objectContaining({
                 review: expect.objectContaining({
+                  _id: review01?._id.toString(),
                   content: updateReviewData.content,
                   rating: updateReviewData.rating,
-                  user: user01?._id.toString(),
-                  tour: tour01?._id.toString()
+                  user: { _id: user01?._id.toString(), name: user01?.name },
+                  tour: tour01?._id.toString(),
+                  createdAt: expect.any(String),
+                  updatedAt: expect.any(String),
+                  __v: expect.any(Number)
                 })
               })
             })

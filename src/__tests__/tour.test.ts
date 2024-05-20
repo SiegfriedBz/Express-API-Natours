@@ -260,21 +260,45 @@ describe('Tour routes', () => {
             .send(tourUpdateInput)
             .expect(200)
 
-          // Check name was updated
           expect(body).toEqual(
             expect.objectContaining({
               status: 'success',
               data: expect.objectContaining({
                 tour: expect.objectContaining({
+                  startLocation: expect.any(Object),
+                  _id: expect.any(String),
                   name: newTourName,
-                  description: (tour as ITourDocument).description,
+                  duration: expect.any(Number),
+                  maxGroupSize: expect.any(Number),
+                  difficulty: expect.any(String),
+                  ratingsAverage: expect.any(Number),
+                  ratingsCount: expect.any(Number),
                   price: (tour as ITourDocument).price,
                   discount: (tour as ITourDocument).discount,
+                  summary: (tour as ITourDocument).summary,
+                  description: (tour as ITourDocument).description,
+                  imageCover: expect.any(String),
+                  images: expect.any(Array),
                   startDates: (tour as ITourDocument).startDates.map((date) =>
                     date.toISOString()
                   ),
-                  summary: (tour as ITourDocument).summary,
-                  guides: expect.arrayContaining([expect.any(String)])
+                  locations: expect.arrayContaining([
+                    expect.objectContaining({
+                      type: 'Point',
+                      coordinates: expect.arrayContaining([
+                        expect.any(Number),
+                        expect.any(Number)
+                      ]),
+                      description: expect.any(String),
+                      day: expect.any(Number),
+                      _id: expect.any(String)
+                    })
+                  ]),
+                  guides: expect.any(Array),
+                  createdAt: expect.any(String),
+                  updatedAt: expect.any(String),
+                  slug: expect.any(String),
+                  __v: expect.any(Number)
                 })
               })
             })
@@ -319,15 +343,41 @@ describe('Tour routes', () => {
                   status: 'success',
                   data: expect.objectContaining({
                     tour: expect.objectContaining({
-                      name: tourWithoutDiscount?.name,
-                      description: tourWithoutDiscount?.description,
+                      startLocation: expect.any(Object),
+                      _id: expect.any(String),
+                      name: (tourWithoutDiscount as ITourDocument).name,
+                      duration: expect.any(Number),
+                      maxGroupSize: expect.any(Number),
+                      difficulty: expect.any(String),
+                      ratingsAverage: expect.any(Number),
+                      ratingsCount: expect.any(Number),
                       price: tourUpdateInput.price,
                       discount: tourUpdateInput.discount,
-                      startDates: tourWithoutDiscount?.startDates.map((date) =>
-                        date.toISOString()
-                      ),
-                      summary: tourWithoutDiscount?.summary,
-                      guides: expect.arrayContaining([expect.any(String)])
+                      summary: (tourWithoutDiscount as ITourDocument).summary,
+                      description: (tourWithoutDiscount as ITourDocument)
+                        .description,
+                      imageCover: expect.any(String),
+                      images: expect.any(Array),
+                      startDates: (
+                        tourWithoutDiscount as ITourDocument
+                      ).startDates.map((date) => date.toISOString()),
+                      locations: expect.arrayContaining([
+                        expect.objectContaining({
+                          type: 'Point',
+                          coordinates: expect.arrayContaining([
+                            expect.any(Number),
+                            expect.any(Number)
+                          ]),
+                          description: expect.any(String),
+                          day: expect.any(Number),
+                          _id: expect.any(String)
+                        })
+                      ]),
+                      guides: expect.any(Array),
+                      createdAt: expect.any(String),
+                      updatedAt: expect.any(String),
+                      slug: expect.any(String),
+                      __v: expect.any(Number)
                     })
                   })
                 })
@@ -432,21 +482,45 @@ describe('Tour routes', () => {
             .send(tourUpdateInput)
             .expect(200)
 
-          // Check name was updated
           expect(body).toEqual(
             expect.objectContaining({
               status: 'success',
               data: expect.objectContaining({
                 tour: expect.objectContaining({
+                  startLocation: expect.any(Object),
+                  _id: expect.any(String),
                   name: newTourName,
-                  description: (tour as ITourDocument).description,
+                  duration: expect.any(Number),
+                  maxGroupSize: expect.any(Number),
+                  difficulty: expect.any(String),
+                  ratingsAverage: expect.any(Number),
+                  ratingsCount: expect.any(Number),
                   price: (tour as ITourDocument).price,
                   discount: (tour as ITourDocument).discount,
+                  summary: (tour as ITourDocument).summary,
+                  description: (tour as ITourDocument).description,
+                  imageCover: expect.any(String),
+                  images: expect.any(Array),
                   startDates: (tour as ITourDocument).startDates.map((date) =>
                     date.toISOString()
                   ),
-                  summary: (tour as ITourDocument).summary,
-                  guides: expect.arrayContaining([expect.any(String)])
+                  locations: expect.arrayContaining([
+                    expect.objectContaining({
+                      type: 'Point',
+                      coordinates: expect.arrayContaining([
+                        expect.any(Number),
+                        expect.any(Number)
+                      ]),
+                      description: expect.any(String),
+                      day: expect.any(Number),
+                      _id: expect.any(String)
+                    })
+                  ]),
+                  guides: expect.any(Array),
+                  createdAt: expect.any(String),
+                  updatedAt: expect.any(String),
+                  slug: expect.any(String),
+                  __v: expect.any(Number)
                 })
               })
             })
@@ -528,7 +602,7 @@ describe('Tour routes', () => {
   })
 
   describe('Get All tours route', () => {
-    const totalNumOfTours = 12
+    const totalNumOfTours = 8
 
     beforeEach(async () => {
       // Clean DB & Create Tours

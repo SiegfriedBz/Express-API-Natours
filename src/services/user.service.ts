@@ -10,6 +10,7 @@ import type {
 } from '../zodSchema/user.zodSchema'
 import type { IUserDocument } from '../types/user.types'
 import logger from '../utils/logger.utils'
+import { Query as ExpressQuery } from 'express-serve-static-core'
 
 export type TUserWithoutPassword = Omit<IUserDocument, 'password'>
 
@@ -154,11 +155,13 @@ export async function updateUser(
 }
 
 /**
- * Retrieves all users.
+ * Retrieves all users matching the query.
  * @returns An array of users without the password field.
  */
-export async function getAllUsers(): Promise<TUserWithoutPassword[] | null> {
-  const users = await User.find().select('-password')
+export async function getAllUsers(
+  query: ExpressQuery
+): Promise<TUserWithoutPassword[] | null> {
+  const users = await User.find(query).select('-password')
 
   return users
 }

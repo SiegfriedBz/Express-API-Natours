@@ -176,6 +176,15 @@ type TGetToursWithinProps = {
   distance: string
   latlng: string
   unit: string
+  query: ExpressQuery
+}
+
+export type TQueryFilterGeoQuery = {
+  startLocation?: {
+    $geoWithin: {
+      $centerSphere: [[number, number], number]
+    }
+  }
 }
 
 /**
@@ -186,7 +195,8 @@ type TGetToursWithinProps = {
 export async function getToursWithin({
   distance,
   latlng,
-  unit
+  unit,
+  query
 }: TGetToursWithinProps) {
   const radius = Number(distance) / EARTH_RADIUS[unit === 'mi' ? 'mi' : 'km']
 
@@ -198,12 +208,18 @@ export async function getToursWithin({
     })
   }
 
-  const tours = await Tour.find({
+  const queryFilterGeoQuery: TQueryFilterGeoQuery = {
     startLocation: {
       $geoWithin: {
         $centerSphere: [[Number(lng), Number(lat)], radius]
       }
     }
+  }
+
+  const tours = await queryBuilderService<ITourDocument>({
+    queryFilterGeoQuery,
+    query,
+    Model: Tour
   })
 
   return tours

@@ -51,16 +51,36 @@ describe('Bookings routes', () => {
             data: expect.objectContaining({
               bookings: expect.arrayContaining([
                 expect.objectContaining({
+                  _id: expect.any(String),
                   price: expect.any(Number),
-                  user: expect.objectContaining({
-                    _id: expect.any(String),
-                    name: expect.any(String)
-                  }),
-                  tour: expect.objectContaining({
+                  tour: {
                     _id: expect.any(String),
                     name: expect.any(String),
-                    price: expect.any(Number)
-                  })
+                    duration: expect.any(Number),
+                    maxGroupSize: expect.any(Number),
+                    difficulty: expect.any(String),
+                    ratingsAverage: expect.any(Number),
+                    ratingsCount: expect.any(Number),
+                    imageCover: expect.any(String),
+                    locations: expect.arrayContaining([
+                      expect.objectContaining({
+                        type: 'Point',
+                        coordinates: expect.arrayContaining([
+                          expect.any(Number),
+                          expect.any(Number)
+                        ]),
+                        description: expect.any(String),
+                        day: expect.any(Number),
+                        _id: expect.any(String)
+                      })
+                    ]),
+                    guides: expect.any(Array),
+                    slug: expect.any(String)
+                  },
+                  user: { _id: expect.any(String), name: expect.any(String) },
+                  createdAt: expect.any(String),
+                  updatedAt: expect.any(String),
+                  __v: expect.any(Number)
                 })
               ])
             })
@@ -133,16 +153,36 @@ describe('Bookings routes', () => {
             data: expect.objectContaining({
               bookings: expect.arrayContaining([
                 expect.objectContaining({
+                  _id: expect.any(String),
                   price: expect.any(Number),
-                  user: expect.objectContaining({
-                    _id: expect.any(String),
-                    name: expect.any(String)
-                  }),
-                  tour: expect.objectContaining({
-                    _id: expect.any(String),
+                  tour: {
+                    _id: tour?._id.toString(),
                     name: expect.any(String),
-                    price: expect.any(Number)
-                  })
+                    duration: expect.any(Number),
+                    maxGroupSize: expect.any(Number),
+                    difficulty: expect.any(String),
+                    ratingsAverage: expect.any(Number),
+                    ratingsCount: expect.any(Number),
+                    imageCover: expect.any(String),
+                    locations: expect.arrayContaining([
+                      expect.objectContaining({
+                        type: 'Point',
+                        coordinates: expect.arrayContaining([
+                          expect.any(Number),
+                          expect.any(Number)
+                        ]),
+                        description: expect.any(String),
+                        day: expect.any(Number),
+                        _id: expect.any(String)
+                      })
+                    ]),
+                    guides: expect.any(Array),
+                    slug: expect.any(String)
+                  },
+                  user: { _id: expect.any(String), name: expect.any(String) },
+                  createdAt: expect.any(String),
+                  updatedAt: expect.any(String),
+                  __v: expect.any(Number)
                 })
               ])
             })
@@ -188,7 +228,7 @@ describe('Bookings routes', () => {
     })
 
     describe('When Admin is logged in', () => {
-      it('should send 200 + booking', async () => {
+      it('should send 200 + booking with booker info', async () => {
         const admin = await createUserAs({ as: 'admin' })
         const { accessTokenCookie: adminAccessTokenCookie } = await loginAs({
           asDocument: admin,
@@ -205,16 +245,36 @@ describe('Bookings routes', () => {
             status: 'success',
             data: expect.objectContaining({
               booking: expect.objectContaining({
+                _id: booking?._id.toString(),
                 price: expect.any(Number),
-                user: expect.objectContaining({
-                  _id: expect.any(String),
-                  name: expect.any(String)
-                }),
-                tour: expect.objectContaining({
+                tour: {
                   _id: expect.any(String),
                   name: expect.any(String),
-                  price: expect.any(Number)
-                })
+                  duration: expect.any(Number),
+                  maxGroupSize: expect.any(Number),
+                  difficulty: expect.any(String),
+                  ratingsAverage: expect.any(Number),
+                  ratingsCount: expect.any(Number),
+                  imageCover: expect.any(String),
+                  locations: expect.arrayContaining([
+                    expect.objectContaining({
+                      type: 'Point',
+                      coordinates: expect.arrayContaining([
+                        expect.any(Number),
+                        expect.any(Number)
+                      ]),
+                      description: expect.any(String),
+                      day: expect.any(Number),
+                      _id: expect.any(String)
+                    })
+                  ]),
+                  guides: expect.any(Array),
+                  slug: expect.any(String)
+                },
+                user: { _id: booker?._id.toString(), name: booker?.name },
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String),
+                __v: expect.any(Number)
               })
             })
           })
@@ -223,7 +283,7 @@ describe('Bookings routes', () => {
     })
 
     describe('When the Booker is logged in', () => {
-      it('should send 200 + booking', async () => {
+      it('should send 200 + booking with booker info', async () => {
         const { accessTokenCookie: bookerAccessTokenCookie } = await loginAs({
           asDocument: booker as IUserDocument,
           app
@@ -239,16 +299,36 @@ describe('Bookings routes', () => {
             status: 'success',
             data: expect.objectContaining({
               booking: expect.objectContaining({
+                _id: booking?._id.toString(),
                 price: expect.any(Number),
-                user: expect.objectContaining({
-                  _id: expect.any(String),
-                  name: expect.any(String)
-                }),
-                tour: expect.objectContaining({
+                tour: {
                   _id: expect.any(String),
                   name: expect.any(String),
-                  price: expect.any(Number)
-                })
+                  duration: expect.any(Number),
+                  maxGroupSize: expect.any(Number),
+                  difficulty: expect.any(String),
+                  ratingsAverage: expect.any(Number),
+                  ratingsCount: expect.any(Number),
+                  imageCover: expect.any(String),
+                  locations: expect.arrayContaining([
+                    expect.objectContaining({
+                      type: 'Point',
+                      coordinates: expect.arrayContaining([
+                        expect.any(Number),
+                        expect.any(Number)
+                      ]),
+                      description: expect.any(String),
+                      day: expect.any(Number),
+                      _id: expect.any(String)
+                    })
+                  ]),
+                  guides: expect.any(Array),
+                  slug: expect.any(String)
+                },
+                user: { _id: booker?._id.toString(), name: booker?.name },
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String),
+                __v: expect.any(Number)
               })
             })
           })

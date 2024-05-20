@@ -41,7 +41,7 @@ export default async function preValidateUpdateReview(
     }
 
     // 2. Checks that the current user is the author of this review
-    const userIsAuthor = review.user.toString() === currentUserId
+    const userIsAuthor = review.user._id.toString() === currentUserId
 
     if (!userIsAuthor) {
       return next(

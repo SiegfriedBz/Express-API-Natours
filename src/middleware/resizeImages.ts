@@ -136,7 +136,7 @@ const resizeImages = async (
     }
 
     // 3. Treat Tour - rest of images
-    if (tourImagesBuffer) {
+    if (tourImagesBuffer?.length > 0) {
       await Promise.all(
         // return an array of promises
         tourImagesBuffer.map((imgBuffer, idx) => {

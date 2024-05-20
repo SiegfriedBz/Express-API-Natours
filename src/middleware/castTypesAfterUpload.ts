@@ -4,10 +4,13 @@
  * @param res - The Express response object.
  * @param next - The next middleware function.
  */
-import { tourMulterNumberFields } from '../utils/multer.upload.tour.utils'
+import {
+  tourMulterNumberFields,
+  tourMulterObjectFields
+} from '../utils/multer.upload.tour.utils'
 import type { NextFunction, Request, Response } from 'express'
 
-const castToNumberAfterUpload = (
+const castTypesAfterUpload = (
   req: Request,
   res: Response,
   next: NextFunction
@@ -17,6 +20,11 @@ const castToNumberAfterUpload = (
   Object.entries(castBody).forEach(([key, value]) => {
     if (tourMulterNumberFields.includes(key)) {
       castBody[key] = Number(value)
+    } else if (
+      tourMulterObjectFields.includes(key) &&
+      typeof value === 'string'
+    ) {
+      castBody[key] = JSON.parse(value)
     }
   })
 
@@ -25,4 +33,4 @@ const castToNumberAfterUpload = (
   next()
 }
 
-export default castToNumberAfterUpload
+export default castTypesAfterUpload
