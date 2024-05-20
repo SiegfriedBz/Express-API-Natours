@@ -408,7 +408,8 @@ export const getAllUsersHandler = async (
   next: NextFunction
 ) => {
   try {
-    const users = await getAllUsers()
+    const { query } = req
+    const users = await getAllUsers(query)
 
     return res.status(200).json({
       status: 'success',
