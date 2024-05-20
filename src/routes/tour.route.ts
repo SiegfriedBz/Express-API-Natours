@@ -6,7 +6,7 @@ import requireUser from '../middleware/requireUser'
 import restrictToRole from '../middleware/restrictToRole'
 import validateRequest from '../middleware/validateRequest'
 import multerUpload from '../middleware/multerUpload'
-import castToNumberAfterUpload from '../middleware/castToNumberAfterUpload'
+import castTypesAfterUpload from '../middleware/castTypesAfterUpload'
 import resizeImages from '../middleware/resizeImages'
 import {
   getAllToursHandler,
@@ -69,7 +69,7 @@ router
   /** CREATE TOUR */
   .post(
     multerUpload(tourMulterUploadFields),
-    castToNumberAfterUpload,
+    castTypesAfterUpload,
     validateRequest(createTourZodSchema),
     resizeImages,
     createTourHandler
@@ -80,7 +80,7 @@ router
   /** UPDATE TOUR */
   .patch(
     multerUpload(tourMulterUploadFields),
-    castToNumberAfterUpload,
+    castTypesAfterUpload,
     validateRequest(updateTourZodSchema),
     resizeImages,
     updateTourHandler
