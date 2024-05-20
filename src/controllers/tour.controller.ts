@@ -108,7 +108,7 @@ export const createTourHandler = async (
     const data = {
       ...body,
       ...(imageCoverName ? { imageCover: imageCoverName } : {}),
-      ...(otherImageNames ? { images: otherImageNames } : {})
+      ...(otherImageNames?.length > 0 ? { images: otherImageNames } : {})
     }
 
     // 3. Create tour
@@ -157,7 +157,7 @@ export const updateTourHandler = async (
     const data = {
       ...body,
       ...(imageCoverName ? { imageCover: imageCoverName } : {}),
-      ...(otherImageNames ? { images: otherImageNames } : {})
+      ...(otherImageNames?.length > 0 ? { images: otherImageNames } : {})
     }
 
     // 3. Update tour
@@ -294,13 +294,20 @@ export const getToursWithinHandler = async (
 ) => {
   try {
     const {
-      params: { distance, latlng, unit }
+      params: { distance, latlng, unit },
+      query
     } = req
 
-    const tours = await getToursWithin({ distance, latlng, unit })
+    const tours: ITourDocument[] = await getToursWithin({
+      distance,
+      latlng,
+      unit,
+      query
+    })
 
     return res.status(200).json({
       status: 'success',
+      dataCount: tours?.length,
       data: {
         tours
       }
