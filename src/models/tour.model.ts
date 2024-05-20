@@ -124,4 +124,13 @@ tourSchema.pre('save', function (next) {
   next()
 })
 
+// Query pre Middleware/Hook - this : current query instance
+tourSchema.pre(/^find/, function (next) {
+  ;(this as mongoose.Query<ITourDocument[], ITourDocument>).populate({
+    path: 'guides',
+    select: '-__v -passwordChangedAt -password'
+  })
+  next()
+})
+
 export default mongoose.model<ITourDocument>('Tour', tourSchema)
