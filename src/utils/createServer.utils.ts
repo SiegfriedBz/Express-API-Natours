@@ -8,6 +8,8 @@ import routes from '../routes'
 
 export default function createServer(): Express {
   const app = express()
+  // Serve static files
+  app.use(express.static(path.join(__dirname, '../../public')))
 
   // Pug for email templates
   app.set('view engine', 'pug')
@@ -21,7 +23,6 @@ export default function createServer(): Express {
   )
 
   app.use(cookieParser())
-  app.use(express.static('public'))
 
   routes(app)
 
