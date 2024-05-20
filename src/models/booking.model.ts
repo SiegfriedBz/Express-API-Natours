@@ -33,7 +33,8 @@ bookingSchema.pre(/^find/, function (next) {
     })
     .populate({
       path: 'tour',
-      select: 'name price'
+      select:
+        'name slug imageCover difficulty duration locations maxGroupSize ratingsAverage ratingsCount'
     })
 
   next()
