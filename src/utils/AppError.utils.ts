@@ -18,5 +18,7 @@ export default class AppError extends Error {
     this.isHandledDBError = false
     this.code = null
     this.name = ''
+
+    Error.captureStackTrace(this, this.constructor)
   }
 }
