@@ -12,7 +12,7 @@ export default function createServer(): Express {
 
   // Pug for email templates
   app.set('view engine', 'pug')
-  app.set('views', path.join(__dirname, 'views'))
+  app.set('views', path.join(__dirname, '../views'))
 
   app.use(
     cors({
