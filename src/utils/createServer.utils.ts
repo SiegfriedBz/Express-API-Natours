@@ -5,16 +5,10 @@ import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import routes from '../routes'
 
-const ENV = process.env.NODE_ENV
-
 export default function createServer(): Express {
   const app = express()
   // Serve static files
-  const publicPath =
-    ENV === 'production'
-      ? path.join(__dirname, '../../public')
-      : path.join(__dirname, '../public')
-  app.use(express.static(publicPath))
+  app.use(express.static(path.join(__dirname, '../../public')))
 
   // Pug for email templates
   app.set('view engine', 'pug')
