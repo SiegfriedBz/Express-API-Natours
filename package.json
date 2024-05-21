@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "NODE_ENV=development ts-node-dev --respawn --transpile-only src/app.ts",
     "build": "tsc",
+    "start": "NODE_ENV=production node build/app.js",
     "lint": "eslint . --ext .ts",
     "prettier-format": "prettier --config .prettierrc 'src/**/*.ts' --write",
     "test": "jest --detectOpenHandles",
