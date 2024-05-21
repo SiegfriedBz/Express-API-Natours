@@ -8,6 +8,7 @@ import type {
 } from '../zodSchema/tour.zodSchema'
 import type { ITourDocument } from '../types/tour.types'
 import type { Query as ExpressQuery } from 'express-serve-static-core'
+import logger from '../utils/logger.utils'
 
 const EARTH_RADIUS = {
   mi: 3963.2,
@@ -24,8 +25,9 @@ const METER_TO = {
  * @returns A promise that resolves to an array of tours.
  */
 export async function getAllTours(query: ExpressQuery) {
+  logger.info('getAllTours Query:', query)
   const tours = await queryBuilderService<ITourDocument>({ query, Model: Tour })
-
+  logger.info('getAllTours tours:', tours)
   return tours
 }
 

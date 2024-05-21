@@ -32,8 +32,10 @@ export const getAllToursHandler = async (
 ) => {
   try {
     const { query } = req
+    logger.info('getAllToursHandler Query:', query)
 
     const tours: ITourDocument[] = await getAllTours(query)
+    logger.info('getAllToursHandler tours:', tours)
 
     return res.status(200).json({
       status: 'success',
