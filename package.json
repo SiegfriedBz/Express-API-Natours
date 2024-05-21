@@ -4,7 +4,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "NODE_ENV=development ts-node-dev --respawn --transpile-only src/app.ts",
-    "build": "tsc",
+    "build": "tsc && npm run copy-views",
+    "copy-views": "cp -r src/views/* build/views",
     "start": "NODE_ENV=production node build/app.js",
     "lint": "eslint . --ext .ts",
     "prettier-format": "prettier --config .prettierrc 'src/**/*.ts' --write",
@@ -61,6 +62,7 @@
     "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^7.6.0",
     "@typescript-eslint/parser": "^7.6.0",
+    "copyfiles": "^2.4.1",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",
