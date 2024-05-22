@@ -1,14 +1,16 @@
 import config from 'config'
 import type { CookieOptions } from 'express'
+import logger from './logger.utils'
 
 export default function setTokenCookieOptions(): CookieOptions {
   const isProduction = process.env.NODE_ENV === 'production'
 
-  console.log('CookieOptions isProduction: ', isProduction)
-  console.log(
-    "CookieOptions config.get<string>('appDomainName'): ",
-    config.get<string>('appDomainName')
-  )
+  logger.info({ cookieOptionsIsProduction: isProduction })
+  logger.info({
+    cookieOptionsAppDomain: isProduction
+      ? config.get<string>('appDomainName')
+      : 'localhost'
+  })
 
   return {
     httpOnly: true,
