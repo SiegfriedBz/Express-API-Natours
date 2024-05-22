@@ -8,14 +8,14 @@ export default function setTokenCookieOptions(): CookieOptions {
   logger.info({ cookieOptionsIsProduction: isProduction })
   logger.info({
     cookieOptionsAppDomain: isProduction
-      ? config.get<string>('appDomainName')
+      ? config.get<string>('serverDomainName')
       : 'localhost'
   })
 
   return {
     httpOnly: true,
     path: '/',
-    domain: isProduction ? config.get<string>('appDomainName') : 'localhost',
+    domain: isProduction ? config.get<string>('serverDomainName') : 'localhost',
     secure: isProduction,
     sameSite: isProduction ? 'none' : 'lax'
   }
