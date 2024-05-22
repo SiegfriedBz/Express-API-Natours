@@ -71,6 +71,8 @@ export const createSessionHandler = async (
       sessionId: newSession._id
     })
 
+    logger.info({ createSessionHandlerAccessToken: accessToken })
+
     // 5. Set cookies
     res.cookie('accessToken', accessToken, setTokenCookieOptions())
     res.cookie('refreshToken', refreshToken, setTokenCookieOptions())
