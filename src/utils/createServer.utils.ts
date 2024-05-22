@@ -4,6 +4,7 @@ import express, { Express } from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import routes from '../routes'
+import logger from './logger.utils'
 
 export default function createServer(): Express {
   const app = express()
@@ -20,6 +21,9 @@ export default function createServer(): Express {
       credentials: true
     })
   )
+  logger.info({
+    allowedOrigins: config.get<string | string[]>('cors.allowedOrigins')
+  })
 
   app.use(cookieParser())
 
