@@ -6,7 +6,7 @@ const MONGO_URL = `MONGO_${ENV?.toUpperCase() || 'DEVELOPMENT'}_DB_URL`
 
 export default {
   port: 'PORT',
-  appDomainName: 'APP_DOMAIN_NAME',
+  serverDomainName: 'SERVER_DOMAIN_NAME',
   dbUri: MONGO_URL,
   cors: { allowedOrigins: 'CORS_ALLOWED_ORIGINS' },
   email: {
