@@ -22,6 +22,11 @@ export default {
       emailPassword: 'MAILTRAP_EMAIL_PASSWORD'
     }
   },
+  cloudinary: {
+    cloudName: 'CLOUDINARY_CLOUD_NAME',
+    apiKey: 'CLOUDINARY_API_KEY',
+    apiSecret: 'CLOUDINARY_API_SECRET'
+  },
   stripe: {
     stripePrivateKey: 'STRIPE_PRIVATE_KEY',
     stripePublicKey: 'STRIPE_PUBLIC_KEY',

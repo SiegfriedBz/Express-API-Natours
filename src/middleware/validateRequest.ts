@@ -19,7 +19,7 @@ export default function validateRequest(zodSchema: AnyZodObject) {
 
       next()
     } catch (err: unknown) {
-      logger.error(err)
+      logger.info(err)
       next(err)
     }
   }

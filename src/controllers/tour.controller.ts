@@ -41,7 +41,7 @@ export const getAllToursHandler = async (
       data: { tours }
     })
   } catch (err: unknown) {
-    logger.error(err)
+    logger.info(err)
     next(err)
   }
 }
@@ -75,7 +75,7 @@ export const getTourHandler = async (
       data: { tour }
     })
   } catch (err: unknown) {
-    logger.error(err)
+    logger.info(err)
     next(err)
   }
 }
@@ -121,7 +121,7 @@ export const createTourHandler = async (
       }
     })
   } catch (err: unknown) {
-    logger.error(err)
+    logger.info(err)
     next(err)
   }
 }
@@ -174,7 +174,7 @@ export const updateTourHandler = async (
       }
     })
   } catch (err: unknown) {
-    logger.error(err)
+    logger.info(err)
     next(err)
   }
 }
@@ -209,7 +209,7 @@ export const deleteTourHandler = async (
 
     return res.status(204).send()
   } catch (err: unknown) {
-    logger.error(err)
+    logger.info(err)
     next(err)
   }
 }
@@ -237,7 +237,7 @@ export const getToursStatsHandler = async (
       }
     })
   } catch (err: unknown) {
-    logger.error(err)
+    logger.info(err)
     next(err)
   }
 }
@@ -269,7 +269,7 @@ export const getToursMonthlyStatsHandler = async (
       }
     })
   } catch (err: unknown) {
-    logger.error(err)
+    logger.info(err)
     next(err)
   }
 }
@@ -313,7 +313,7 @@ export const getToursWithinHandler = async (
       }
     })
   } catch (err: unknown) {
-    logger.error(err)
+    logger.info(err)
     next(err)
   }
 }
@@ -345,7 +345,7 @@ export const getDistancesHandler = async (
       }
     })
   } catch (err: unknown) {
-    logger.error(err)
+    logger.info(err)
     next(err)
   }
 }

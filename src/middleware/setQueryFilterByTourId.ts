@@ -63,7 +63,7 @@ export default async function setQueryFilterByTourId(
 
     next()
   } catch (err: unknown) {
-    logger.error(err)
+    logger.info(err)
     next(err)
   }
 }

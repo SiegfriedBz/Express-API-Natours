@@ -46,7 +46,7 @@ export const getAllReviewsHandler = async (
       data: { reviews }
     })
   } catch (err: unknown) {
-    logger.error(err)
+    logger.info(err)
     next(err)
   }
 }
@@ -84,7 +84,7 @@ export async function getReviewHandler(
       }
     })
   } catch (err: unknown) {
-    logger.error(err)
+    logger.info(err)
     next(err)
   }
 }
@@ -118,7 +118,7 @@ export async function createReviewOnTourHandler(
       }
     })
   } catch (err: unknown) {
-    logger.error(err)
+    logger.info(err)
     next(err)
   }
 }
@@ -165,7 +165,7 @@ export async function updateReviewHandler(
       data: { review: updatedReview }
     })
   } catch (err: unknown) {
-    logger.error(err)
+    logger.info(err)
     next(err)
   }
 }
@@ -202,7 +202,7 @@ export async function deleteReviewHandler(
 
     return res.status(204).send()
   } catch (err: unknown) {
-    logger.error(err)
+    logger.info(err)
     next(err)
   }
 }
