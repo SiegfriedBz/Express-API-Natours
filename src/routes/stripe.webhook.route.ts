@@ -1,10 +1,10 @@
 import express, { type Request, Response, NextFunction } from 'express'
 import Stripe from 'stripe'
 import { getStripeWebhookEvent } from '../services/stripe.service'
-import AppError from '../utils/AppError.utils'
-import logger from '../utils/logger.utils'
 import { createBookingOnTour } from '../services/booking.service'
 import { getUser } from '../services/user.service'
+import AppError from '../utils/AppError.utils'
+import logger from '../utils/logger.utils'
 
 const router = express.Router()
 
@@ -45,7 +45,7 @@ router
         return next(
           new AppError({
             statusCode: 400,
-            message: `Webhook Error: userId, tourId and tourPrice are requited to create booking`
+            message: `Webhook Error: userId, tourId and tourPrice are required to create booking`
           })
         )
       }

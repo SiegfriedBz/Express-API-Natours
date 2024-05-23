@@ -4,6 +4,7 @@ import { queryBuilderService } from '../utils/queryBuilder.service.utils'
 import type { Query as ExpressQuery } from 'express-serve-static-core'
 import type { IBookingDocument } from '../types/booking.types'
 import type { TQueryFilterByTourId } from '../middleware/setQueryFilterByTourId'
+import logger from '../utils/logger.utils'
 
 /**
  * Retrieves all bookings based on the provided query and filter options.
@@ -66,6 +67,8 @@ export async function createBookingOnTour({
     price: tourPrice,
     tour: tourId
   })
+
+  logger.info({ createBookingOnTour: newBooking })
 
   return newBooking
 }

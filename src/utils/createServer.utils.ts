@@ -13,6 +13,7 @@ export default function createServer(): Express {
 
   // Pug for email templates
   app.set('view engine', 'pug')
+  logger.info({ viewsPath: path.join(__dirname, '../views') })
   app.set('views', path.join(__dirname, '../views'))
 
   app.use(
@@ -21,9 +22,6 @@ export default function createServer(): Express {
       credentials: true
     })
   )
-  logger.info({
-    allowedOrigins: config.get<string | string[]>('cors.allowedOrigins')
-  })
 
   app.use(cookieParser())
 
