@@ -16,7 +16,7 @@ import validateRequest from '../middleware/validateRequest'
 import requireUser from '../middleware/requireUser'
 import restrictToRole from '../middleware/restrictToRole'
 import multerUpload from '../middleware/multerUpload'
-import resizeImages from '../middleware/resizeImages'
+import uploadImages from '../middleware/uploadImages'
 import { userMulterUploadFields } from '../utils/multer.upload.user.utils'
 import {
   createUserZodSchema,
@@ -51,7 +51,7 @@ router
   .patch(
     multerUpload(userMulterUploadFields),
     validateRequest(updateMeZodSchema),
-    resizeImages,
+    uploadImages,
     updateMeHandler
   )
 

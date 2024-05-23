@@ -7,7 +7,7 @@ import restrictToRole from '../middleware/restrictToRole'
 import validateRequest from '../middleware/validateRequest'
 import multerUpload from '../middleware/multerUpload'
 import castTypesAfterUpload from '../middleware/castTypesAfterUpload'
-import resizeImages from '../middleware/resizeImages'
+import uploadImages from '../middleware/uploadImages'
 import {
   getAllToursHandler,
   createTourHandler,
@@ -71,7 +71,7 @@ router
     multerUpload(tourMulterUploadFields),
     castTypesAfterUpload,
     validateRequest(createTourZodSchema),
-    resizeImages,
+    uploadImages,
     createTourHandler
   )
 
@@ -82,7 +82,7 @@ router
     multerUpload(tourMulterUploadFields),
     castTypesAfterUpload,
     validateRequest(updateTourZodSchema),
-    resizeImages,
+    uploadImages,
     updateTourHandler
   )
 
