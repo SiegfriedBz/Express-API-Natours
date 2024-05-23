@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "NODE_ENV=development ts-node-dev --respawn --transpile-only src/app.ts",
     "build": "tsc && npm run copy-views",
-    "copy-views": "cp -r src/views/* build/views",
+    "copy-views": "mkdir -p build/views && cp -r src/views/** build/views",
     "start": "NODE_ENV=production node build/app.js",
     "lint": "eslint . --ext .ts",
     "prettier-format": "prettier --config .prettierrc 'src/**/*.ts' --write",
@@ -13,8 +13,7 @@
     "test:watch": "jest --watchAll",
     "prepare": "husky",
     "seed:dev": "NODE_ENV=development ts-node ./dev-data/seed/index.ts",
-    "seed:production": "NODE_ENV=production ts-node ./dev-data/seed/index.ts",
-    "vercel-build": "echo hello"
+    "seed:production": "NODE_ENV=production ts-node ./dev-data/seed/index.ts"
   },
   "keywords": [],
   "author": "",
