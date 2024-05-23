@@ -1,10 +1,12 @@
 import 'dotenv/config'
 import config from 'config'
+import path from 'path'
 import mongoose from 'mongoose'
 import User from '../../src/models/user.model'
 import Tour from '../../src/models/tour.model'
 import Review from '../../src/models/review.model'
 import Booking from '../../src/models/booking.model'
+import uploadMultipleImages from './uploadMultipleImages'
 import logger from '../../src/utils/logger.utils'
 import { readFilePromise } from '../../src/utils/fs.utils'
 import type { TCreateTourInput } from '../../src/zodSchema/tour.zodSchema'
@@ -15,12 +17,13 @@ import type { IUserDocument } from '../../src/types/user.types'
 import type { IReviewDocument } from '../../src/types/review.types'
 import type { IBookingDocument } from '../../src/types/booking.types'
 
-type TCreateTourSeed = {
+export type TCreateTourSeed = {
   _id: string
 } & TCreateTourInput['body']
 
-type TCreateUserSeed = {
+export type TCreateUserSeed = {
   _id: string
+  photo: string
 } & TCreateUserInput['body']
 
 type TCreateReviewSeed = {
@@ -80,7 +83,7 @@ seed()
     process.exit(0)
   })
   .catch((err) => {
-    logger.error(err.message)
+    logger.info(err.message)
     mongoose.disconnect()
     mongoose.connection.close()
     process.exit(1)
@@ -102,7 +105,32 @@ const seedModel = async <T, U>({ Model, name }: TSeedModelProps<T, U>) => {
 
   /** 2. Get data from fs */
   const dataJson = await readFilePromise(`dev-data/data/${name}.json`)
-  const data: U[] = JSON.parse(dataJson)
+  let data: U[] = JSON.parse(dataJson)
+
+  /** Upload Images to Cloudinary */
+  if (name === 'users') {
+    logger.info('🌤️ Uploading users images to Cloudinary...')
+    const imagesFolderPath = path.join(__dirname, '../img/users')
+
+    data = (await uploadMultipleImages({
+      dataForUpload: data as TCreateUserSeed[],
+      imagesFolderPath,
+      modelName: 'users'
+    })) as U[]
+    logger.info('🌤️ Uploading users images to Cloudinary...DONE')
+  }
+
+  if (name === 'tours') {
+    logger.info('🌤️ Uploading tours images to Cloudinary...')
+    const imagesFolderPath = path.join(__dirname, '../img/tours')
+
+    data = (await uploadMultipleImages({
+      dataForUpload: data as TCreateTourSeed[],
+      imagesFolderPath,
+      modelName: 'tours'
+    })) as U[]
+    logger.info('🌤️ Uploading tours images to Cloudinary...DONE')
+  }
 
   /** 3. Seed */
   logger.info(`Seeding ${name}...`)
