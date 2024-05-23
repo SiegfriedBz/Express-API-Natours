@@ -60,7 +60,7 @@ export const createUserHandler = async (
       data: { user }
     })
   } catch (err: unknown) {
-    logger.error(err)
+    logger.info(err)
     next(err)
   }
 }
@@ -192,7 +192,7 @@ export const getMeHandler = async (
       data: { user: currentUser }
     })
   } catch (err: unknown) {
-    logger.error(err)
+    logger.info(err)
     next(err)
   }
 }
@@ -250,7 +250,7 @@ export const updateMeHandler = async (
       data: { user: updatedUser }
     })
   } catch (err: unknown) {
-    logger.error(err)
+    logger.info(err)
     next(err)
   }
 }
@@ -308,7 +308,7 @@ export const updateMyPasswordHandler = async (
       data: { user: userWithoutPassword }
     })
   } catch (err: unknown) {
-    logger.error(err)
+    logger.info(err)
     next(err)
   }
 }
@@ -352,7 +352,7 @@ export const fakeDeleteMeHandler = async (
       data: { user: updatedUser }
     })
   } catch (err: unknown) {
-    logger.error(err)
+    logger.info(err)
     next(err)
   }
 }
@@ -394,7 +394,7 @@ export const updateUserHandler = async (
       data: { user: updatedUser }
     })
   } catch (err: unknown) {
-    logger.error(err)
+    logger.info(err)
     next(err)
   }
 }
@@ -417,7 +417,7 @@ export const getAllUsersHandler = async (
       data: { users }
     })
   } catch (err: unknown) {
-    logger.error(err)
+    logger.info(err)
     next(err)
   }
 }
@@ -451,7 +451,7 @@ export const getUserHandler = async (
       data: { user }
     })
   } catch (err: unknown) {
-    logger.error(err)
+    logger.info(err)
     next(err)
   }
 }

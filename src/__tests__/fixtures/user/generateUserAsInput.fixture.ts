@@ -21,7 +21,7 @@ export const generateUserAsInput = ({
 
   return {
     name: `I am a ${as}`,
-    email: `${as}-${id}@example.com`, // unique
+    email: `${as}-${id}@natours.com`, // unique
     password: CORRECT_PASSWORD,
     passwordConfirmation: CORRECT_PASSWORD,
     role: as

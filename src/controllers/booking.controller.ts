@@ -91,7 +91,7 @@ export const getAllBookingsHandler = async (
       data: { bookings }
     })
   } catch (err: unknown) {
-    logger.error(err)
+    logger.info(err)
     next(err)
   }
 }
@@ -178,7 +178,7 @@ export async function getMyBookingsHandler(
       data: { bookings }
     })
   } catch (err: unknown) {
-    logger.error(err)
+    logger.info(err)
     next(err)
   }
 }

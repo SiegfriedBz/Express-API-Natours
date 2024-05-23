@@ -83,7 +83,7 @@ export const createSessionHandler = async (
       }
     })
   } catch (err: unknown) {
-    logger.error(err)
+    logger.info(err)
     next(err)
   }
 }
@@ -115,7 +115,7 @@ export const deleteSessionHandler = async (
       status: 'success'
     })
   } catch (err: unknown) {
-    logger.error(err)
+    logger.info(err)
     next(err)
   }
 }

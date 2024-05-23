@@ -11,7 +11,7 @@ async function connectDb() {
     await mongoose.connect(dbUri)
     logger.info(`Connected to ${ENV} DB`)
   } catch (error) {
-    logger.error(`Could not connect to ${ENV} DB`)
+    logger.info(`Could not connect to ${ENV} DB`)
     process.exit(1)
   }
 }
