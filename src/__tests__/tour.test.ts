@@ -8,7 +8,6 @@ import { createUserAs } from './utils.ts/createUserAs.utils'
 import { loginAs } from './utils.ts/loginAs.utils'
 import { createTour } from './utils.ts/createTour.utils'
 import { MAX_RESULTS_PER_PAGE } from '../utils/queryBuilder.utils'
-import logger from '../utils/logger.utils'
 import { TOUR_DIFFICULTY } from '../zodSchema/tour.zodSchema'
 import {
   generateTourInput,
@@ -741,8 +740,6 @@ describe('Tour routes', () => {
           .get('/api/v1/tours?duration[lte]=5')
           .expect(200)
 
-        logger.info(body.data.tours)
-
         body.data.tours.forEach((tour: ITourDocument) => {
           expect(tour?.duration).toBeLessThanOrEqual(5)
         })
@@ -761,8 +758,6 @@ describe('Tour routes', () => {
         const { body } = await supertest(app)
           .get('/api/v1/tours?duration[gt]=5')
           .expect(200)
-
-        logger.info(body.data.tours)
 
         body.data.tours.forEach((tour: ITourDocument) => {
           expect(tour?.duration).toBeGreaterThan(5)

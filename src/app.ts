@@ -16,7 +16,7 @@ const app = createServer()
 app.listen(port, async () => {
   await connectDb()
 
-  logger.info(`App running at http://localhost:${port}`)
+  logger.info(`App running at on port: ${port}`)
 
   // Error handler middleware
   app.use(errorMiddleware)
