@@ -4,6 +4,7 @@ import Stripe from 'stripe'
 import type { Request } from 'express'
 import type { IUserDocument } from '../types/user.types'
 import type { ITourDocument } from '../types/tour.types'
+import logger from '../utils/logger.utils'
 
 const stripe = new Stripe(config.get<string>('stripe.stripePrivateKey'))
 const stripeWebhookEndpointSecret = config.get<string>(
@@ -86,6 +87,8 @@ export const getStripeWebhookEvent = (
     stripeSignature,
     stripeWebhookEndpointSecret
   )
+
+  logger.info({ getStripeWebhookEvent: event })
 
   return event
 }

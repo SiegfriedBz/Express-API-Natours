@@ -6,6 +6,7 @@ import pug from 'pug'
 import { convert } from 'html-to-text'
 import type SMTPTransport from 'nodemailer/lib/smtp-transport'
 import type { TUserWithoutPassword } from '../services/user.service'
+import logger from './logger.utils'
 
 const htmlToTextOptions = {
   wordwrap: 130
@@ -92,6 +93,7 @@ export default class Email {
       __dirname,
       `../views/email/${pugTemplateName}.pug`
     )
+    logger.info({ pugFilePath })
     // HTML version
     const html = pug.renderFile(pugFilePath, {
       subject,
