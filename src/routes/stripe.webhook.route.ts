@@ -16,6 +16,11 @@ router
 
     let event: Stripe.Event | null = null
 
+    logger.info({ stripeHandlerBody: body })
+    logger.info({
+      stripeHandlerStripeSignature: stripeSignature
+    })
+
     try {
       event = getStripeWebhookEvent(body, stripeSignature)
     } catch (err) {
