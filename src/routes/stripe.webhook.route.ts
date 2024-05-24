@@ -16,15 +16,11 @@ router
 
     let event: Stripe.Event | null = null
 
-    logger.info({ stripeHandlerBody: body })
-    logger.info({
-      stripeHandlerStripeSignature: stripeSignature
-    })
-
     try {
       event = getStripeWebhookEvent(body, stripeSignature)
     } catch (err) {
       const error = err as Error
+      logger.info({ stripeWebhookEventError: error.message })
       return next(
         new AppError({
           statusCode: 400,
@@ -35,6 +31,8 @@ router
 
     // Handle the event
     if (event.type === 'checkout.session.completed') {
+      logger.info(`Stripe webhook => event checkout.session.completed`)
+
       const checkoutSessionCompleted = event.data.object
 
       const tourId = checkoutSessionCompleted.client_reference_id
@@ -60,6 +58,9 @@ router
         tourId,
         tourPrice
       })
+      logger.info(
+        `Stripe webhook => Booking created for user ${userId} on tour ${tourId}`
+      )
     } else {
       logger.info(`Unhandled event type ${event.type}`)
     }
