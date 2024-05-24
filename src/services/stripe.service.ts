@@ -34,7 +34,8 @@ export const getStripeCheckoutSession = async ({ req, user, tour }: TProps) => {
     price: tourPrice,
     name: tourName,
     // slug: tourSlug,
-    summary: tourSummary
+    summary: tourSummary,
+    imageCover: tourImageCover
   } = tour
 
   const refererUrl =
@@ -57,10 +58,8 @@ export const getStripeCheckoutSession = async ({ req, user, tour }: TProps) => {
           product_data: {
             name: `${tourName} Tour`,
             description: tourSummary,
-            // works only with live hosted imgs
-            images: [
-              'https://images.unsplash.com/photo-1587775849545-42e56f1849e9?q=80&w=3270&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
-            ]
+            // works only with live hosted imgs - get from cloudinary
+            images: [tourImageCover]
           },
           unit_amount: tourPrice * 100 // CENTS
         },
@@ -82,6 +81,9 @@ export const getStripeWebhookEvent = (
   body: 'string | Buffer',
   stripeSignature: string
 ) => {
+  logger.info({
+    getStripeWebhookSecret: stripeWebhookEndpointSecret
+  })
   const event = stripe.webhooks.constructEvent(
     body,
     stripeSignature,
