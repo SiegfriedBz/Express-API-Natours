@@ -43,7 +43,6 @@ const uploadToCloudinary = async ({
         .end(imageBuffer)
     })
 
-    logger.info({ cldUploadResult: uploadResult })
     return (uploadResult as UploadApiResponse).secure_url
   } catch (error) {
     logger.info({ cldError: error })

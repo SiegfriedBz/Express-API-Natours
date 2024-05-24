@@ -104,7 +104,7 @@ const uploadImages = async (
     // 1. USER - Photo img
     if (userId && userImageBuffer?.[0]?.buffer != null) {
       // Generate unique image name
-      const userFileName = `user-${userId}-${uniqueId}-photo`
+      const userFileName = `user-${userId}`
 
       try {
         // 1. Cloudinary upload => get cloudinary image secure_url
@@ -132,7 +132,7 @@ const uploadImages = async (
     // 2. TOURS - Treat Tour - Cover img
     if (tourImageCoverBuffer?.[0]?.buffer != null) {
       // Generate unique image name
-      const imageCoverName = `tour-${tourId ? tourId : ''}-${uniqueId}-cover`
+      const imageCoverName = `tour-${tourId ? tourId : uniqueId}-cover`
 
       try {
         // 1. Cloudinary upload => get cloudinary image secure_url
@@ -163,7 +163,7 @@ const uploadImages = async (
           // return an array of promises
           tourImagesBuffer.map((imgBuffer, idx) => {
             // Generate unique image name
-            const imageName = `tour-${tourId ? tourId : ''}-${uniqueId}-${idx + 1}`
+            const imageName = `tour-${tourId ? tourId : uniqueId}-image-${idx + 1}`
 
             // 1. Concurrently Cloudinary upload => get cloudinary image secure_url promise
             const cldImageUrlPromise = uploadToCloudinary({

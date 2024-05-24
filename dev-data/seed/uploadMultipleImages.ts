@@ -24,7 +24,7 @@ async function uploadMultipleImages({
             const coverImageSecureUrl = await uploadToCloudinary({
               folder: 'tours',
               imageBuffer: coverImageBuffer,
-              cldPublicId: `${tour._id}-cover`
+              cldPublicId: `tour-${tour._id}-cover`
             })
 
             const imagesSecureUrls = await Promise.all(
@@ -34,7 +34,7 @@ async function uploadMultipleImages({
                 const secureUrl = await uploadToCloudinary({
                   folder: 'tours',
                   imageBuffer,
-                  cldPublicId: `${tour._id}-image-${index + 1}`
+                  cldPublicId: `tour-${tour._id}-image-${index + 1}`
                 })
                 return secureUrl
               })
@@ -53,7 +53,7 @@ async function uploadMultipleImages({
           const secureUrl = await uploadToCloudinary({
             folder: 'users',
             imageBuffer,
-            cldPublicId: user._id
+            cldPublicId: `user-${user._id}`
           })
           return { ...user, photo: secureUrl }
         }
