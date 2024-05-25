@@ -38,7 +38,7 @@ const tourSchema = new mongoose.Schema(
     },
     ratingsCount: {
       type: Number,
-      default: 0
+      default: 1
     },
     price: {
       type: Number,
@@ -66,16 +66,10 @@ const tourSchema = new mongoose.Schema(
     },
     imageCover: {
       type: String
-      // required: [true, "A tour must have a cover image"]
     },
     images: {
       type: [String]
     },
-    // createdAt: {
-    //   type: Date,
-    //   default: Date.now(),
-    //   select: false
-    // },
     startDates: {
       type: [Date] // accept timestamps in ms || "2024-03-10" => Mongo will try to parse it into a Date
     },
