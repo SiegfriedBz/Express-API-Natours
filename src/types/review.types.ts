@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import type { Model } from 'mongoose'
 import type { ITourDocument } from './tour.types'
 import type { IUserDocument } from './user.types'
 
@@ -12,4 +13,8 @@ export interface IReviewDBInput {
 export interface IReviewDocument extends IReviewDBInput, mongoose.Document {
   createdAt: Date
   updatedAt: Date
+}
+
+export interface IReviewModel extends Model<IReviewDocument> {
+  calcAverageRatings(tourId: typeof mongoose.Types.ObjectId): Promise<void>
 }
