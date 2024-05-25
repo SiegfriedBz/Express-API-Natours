@@ -86,7 +86,7 @@ export const getStripeWebhookEvent = (
     stripeSignature,
     stripeWebhookEndpointSecret
   )
-
+  logger.info({ stripeWebhookBody: body })
   logger.info({ getStripeWebhookSig: stripeSignature })
   logger.info({ getStripeWebhookSecret: stripeWebhookEndpointSecret })
   logger.info({ getStripeWebhookEvent: event })
