@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import type { IReviewDocument } from '../types/review.types'
+import type { IReviewDocument, IReviewModel } from '../types/review.types'
 
 const reviewSchema = new mongoose.Schema(
   {
@@ -34,12 +34,45 @@ reviewSchema.pre(/^find/, function (next) {
     path: 'user',
     select: 'name photo'
   })
-  // .populate({
-  //   path: 'tour',
-  //   select: 'name price'
-  // })
 
   next()
 })
 
-export default mongoose.model<IReviewDocument>('Review', reviewSchema)
+// static method to calculate average rating and number of ratings for a given tour
+reviewSchema.statics.calcAverageRatings = async function (tourId) {
+  const stats = await this.aggregate([
+    {
+      $match: { tour: tourId }
+    },
+    {
+      $group: {
+        _id: '$tour',
+        nRating: { $sum: 1 },
+        avgRating: { $avg: '$rating' }
+      }
+    }
+  ])
+
+  if (stats.length > 0) {
+    await mongoose.model('Tour').findByIdAndUpdate(tourId, {
+      ratingsAverage: stats[0].avgRating,
+      ratingsCount: stats[0].nRating
+    })
+  } else {
+    await mongoose.model('Tour').findByIdAndUpdate(tourId, {
+      ratingsAverage: 4.5,
+      ratingsCount: 1
+    })
+  }
+}
+
+// Step 2: Call this method in a post-save hook
+reviewSchema.post<IReviewDocument>('save', function () {
+  // this points to current review
+  ;(this.constructor as IReviewModel).calcAverageRatings(this.tour)
+})
+
+export default mongoose.model<IReviewDocument, IReviewModel>(
+  'Review',
+  reviewSchema
+)
