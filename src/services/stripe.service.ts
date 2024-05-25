@@ -78,15 +78,17 @@ export const getStripeCheckoutSession = async ({ req, user, tour }: TProps) => {
  * @returns The retrieved Stripe webhook event.
  */
 export const getStripeWebhookEvent = (
-  body: 'string | Buffer',
+  body: string | Buffer,
   stripeSignature: string
 ) => {
-  logger.info({ stripeWebhookBody: body })
+  const rawBody = body.toString('utf8')
+
+  logger.info({ stripeWebhookRawBody: rawBody })
   logger.info({ getStripeWebhookSig: stripeSignature })
   logger.info({ getStripeWebhookSecret: stripeWebhookEndpointSecret })
 
   const event = stripe.webhooks.constructEvent(
-    body,
+    rawBody,
     stripeSignature,
     stripeWebhookEndpointSecret
   )
