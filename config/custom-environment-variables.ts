@@ -1,13 +1,8 @@
-import * as process from 'process'
-
-const ENV = process.env.NODE_ENV
-
-const MONGO_URL = `MONGO_${ENV?.toUpperCase() || 'DEVELOPMENT'}_DB_URL`
-
 export default {
   port: 'PORT',
   serverDomainName: 'SERVER_DOMAIN_NAME',
-  dbUri: MONGO_URL,
+  dbUri: 'MONGO_DB_URL',
+  serveSwaggerUI: 'SERVE_SWAGGER_UI',
   cors: { allowedOrigins: 'CORS_ALLOWED_ORIGINS' },
   email: {
     from: 'EMAIL_FROM',

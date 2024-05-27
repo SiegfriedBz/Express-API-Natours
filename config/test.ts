@@ -1,29 +1,7 @@
+import defaultConfig from './default'
 export default {
-  email: {
-    from: 'Natours <hello@natours.com>',
-    brevo: {
-      emailAdmin: '',
-      emailSmtpKey: ''
-    },
-    mailtrap: {
-      emailHost: '',
-      emailPort: 0,
-      emailUsername: '',
-      emailPassword: ''
-    }
-  },
-  stripe: {
-    stripePrivateKey:
-      'sk_test_51OATwgGyO055z3D9eOYJ73jSMWPYmaMdin20BMynmAPGEv2DwLP57ctckumiJoaYznVp1DmMLQu5uF8ADWtJldjx00mPdzCceU',
-    stripePublicKey:
-      'pk_test_51OATwgGyO055z3D9vjQz2YQXdxrmvqMP7aQpGTfVEyurUFVNDtDLIdhMnPFRJmCabQiYFFQ0Lrkz3TLBioAo1QIk00bKqGaT8C',
-    stripeWebhookEndpointSecret:
-      'whsec_f9c40bcdb5dbf50095b4fbb4b60e44bb52a6965ad3baaf84e6eb5b7fd51984c6'
-  },
+  ...defaultConfig,
   tokens: {
-    passwordResetToken: {
-      expiresIn: 600000
-    },
     accessTokenPrivateKey: `-----BEGIN RSA PRIVATE KEY-----
 MIIJJwIBAAKCAgEA1N0xNx8LTCSoHCpgVnddrvasDltnZH/FiTz+A+K9ZB7BPJPV
 C8ZXfYyp/xMavef1f2r6k1ybFW4xu0qiKSYJD6voEMMtIuxpvx0DcdjrtzTLPcRz
