@@ -11,6 +11,25 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      PORT: ${{ secrets.PORT }}
+      SERVER_DOMAIN_NAME: ${{ secrets.SERVER_DOMAIN_NAME }}
+      CORS_ALLOWED_ORIGINS: ${{ secrets.CORS_ALLOWED_ORIGINS }}
+      MONGO_DB_URL: ${{ secrets.MONGO_DB_URL }}
+      STRIPE_PRIVATE_KEY: ${{ secrets.STRIPE_PRIVATE_KEY }}
+      STRIPE_PUBLIC_KEY: ${{ secrets.STRIPE_PUBLIC_KEY }}
+      STRIPE_WEBHOOK_ENDPOINT_SECRET: ${{ secrets.STRIPE_WEBHOOK_ENDPOINT_SECRET }}
+      EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+      MAILTRAP_EMAIL_HOST: ${{ secrets.MAILTRAP_EMAIL_HOST }}
+      MAILTRAP_EMAIL_PORT: ${{ secrets.MAILTRAP_EMAIL_PORT }}
+      MAILTRAP_EMAIL_USERNAME: ${{ secrets.MAILTRAP_EMAIL_USERNAME }}
+      MAILTRAP_EMAIL_PASSWORD: ${{ secrets.MAILTRAP_EMAIL_PASSWORD }}
+      BREVO_EMAIL_ADMIN: ${{ secrets.BREVO_EMAIL_ADMIN }}
+      BREVO_EMAIL_SMTP_KEY: ${{ secrets.BREVO_EMAIL_SMTP_KEY }}
+      CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+      CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+      CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+      PASSWORD_RESET_TOKEN_EXPIRES_IN: ${{ secrets.PASSWORD_RESET_TOKEN_EXPIRES_IN }}
 
     strategy:
       matrix:
@@ -28,14 +47,3 @@ jobs:
       - run: npm run test
       - name: Run tests
         run: npm test
-        env:
-          STRIPE_PRIVATE_KEY: ${{ secrets.STRIPE_PRIVATE_KEY }}
-          STRIPE_PUBLIC_KEY: ${{ secrets.STRIPE_PUBLIC_KEY }}
-          STRIPE_WEBHOOK_ENDPOINT_SECRET: ${{ secrets.STRIPE_WEBHOOK_ENDPOINT_SECRET }}
-          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
-          MAILTRAP_EMAIL_HOST: ${{ secrets.MAILTRAP_EMAIL_HOST }}
-          MAILTRAP_EMAIL_PORT: ${{ secrets.MAILTRAP_EMAIL_PORT }}
-          MAILTRAP_EMAIL_USERNAME: ${{ secrets.MAILTRAP_EMAIL_USERNAME }}
-          MAILTRAP_EMAIL_PASSWORD: ${{ secrets.MAILTRAP_EMAIL_PASSWORD }}
-          BREVO_EMAIL_ADMIN: ${{ secrets.BREVO_EMAIL_ADMIN }}
-          BREVO_EMAIL_SMTP_KEY: ${{ secrets.BREVO_EMAIL_SMTP_KEY }}
