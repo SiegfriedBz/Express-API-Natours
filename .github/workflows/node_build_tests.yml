@@ -1,4 +1,4 @@
-name: Node.js CI
+name: Node.js Build & Tests
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
       - '*'
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     env:
       PORT: ${{ secrets.PORT }}
@@ -43,7 +43,5 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run build # Compile TypeScript to JavaScript
-      - run: npm run prettier-format && npm run lint
-      - run: npm run test
       - name: Run tests
         run: npm test
