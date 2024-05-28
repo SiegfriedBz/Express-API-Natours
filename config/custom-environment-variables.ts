@@ -2,7 +2,6 @@ export default {
   port: 'PORT',
   serverDomainName: 'SERVER_DOMAIN_NAME',
   dbUri: 'MONGO_DB_URL',
-  serveSwaggerUI: 'SERVE_SWAGGER_UI',
   cors: { allowedOrigins: 'CORS_ALLOWED_ORIGINS' },
   email: {
     from: 'EMAIL_FROM',
