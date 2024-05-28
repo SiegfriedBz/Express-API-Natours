@@ -1,4 +1,4 @@
-name: Node.js CI
+name: Node.js Build, Format & Lint
 
 on:
   push:
@@ -25,4 +25,3 @@ jobs:
       - run: npm ci
       - run: npm run build # Compile TypeScript to JavaScript
       - run: npm run prettier-format && npm run lint
-      - run: npm run test
