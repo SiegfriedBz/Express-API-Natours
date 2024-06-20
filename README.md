@@ -21,6 +21,7 @@ The Natours API now serves as the backend for another project I developed— a [
   - [Public Routes](#public-routes)
   - [Protected Routes](#protected-routes)
 - [Technologies Used](#technologies-used)
+- [Deployment](#deployment)
 
 
 ## Getting Started
@@ -235,7 +236,8 @@ npm start
 - **Jest** (for unit testing)
 - **Supertest** (for testing HTTP APIs)
 
-
+## Deployment
+The Natours API is deployed on Render.com
 
 
 
