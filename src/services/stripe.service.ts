@@ -57,7 +57,8 @@ export const getStripeCheckoutSession = async ({ req, user, tour }: TProps) => {
           currency: 'usd',
           product_data: {
             name: `${tourName} Tour`,
-            description: tourSummary,
+            description: `${tourSummary}
+            👋 👉 Card: 4242 4242 4242 4242 - 04/32 - 424`,
             // works only with live hosted imgs - get from cloudinary
             images: [tourImageCover]
           },
