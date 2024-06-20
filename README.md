@@ -2,9 +2,10 @@
 
 The Natours API originated from a server-rendered web application tutorial in JavaScript, where Pug was used for server-side rendering across all routes.
 
-I refactored and rebuilt the entire project in TypeScript, transforming it into a robust API featuring user authentication, tour bookings, and reviews, with MongoDB for data storage. Additionally, I introduced Zod for input validation and Cloudinary for efficient image storage.
-
-Pug continues to be utilized exclusively for email templates. Comprehensive testing with Jest and SuperTest ensures the API's reliability.
+I refactored and rebuilt the entire project in TypeScript, transforming it into a robust API featuring user authentication, tour bookings, and reviews, with MongoDB for data storage.  
+Additionally, I introduced Zod for input validation and Cloudinary for efficient image storage.  
+Pug continues to be utilized exclusively for email templates.  
+I also added comprehensive testing with Jest and SuperTest to ensure the API's reliability.
 
 The Natours API now serves as the backend for another project I developed— a [React Single Page Application (SPA)](https://github.com/SiegfriedBz/vite_react_ts-natours) tested with Cypress — providing a seamless web application experience.
 
