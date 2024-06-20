@@ -13,6 +13,7 @@ import type { IReviewDocument } from '../types/review.types'
 import type { IUserDocument } from '../types/user.types'
 import type { ITourDocument } from '../types/tour.types'
 import { createBooking } from './utils.ts/createBooking'
+import logger from '../utils/logger.utils'
 
 const app = createServer()
 
@@ -320,6 +321,7 @@ describe('Reviews routes', () => {
 
     beforeEach(async () => {
       review = await createReview()
+      logger.info({ newReview: review })
     })
 
     describe('When Admin is logged in', () => {
