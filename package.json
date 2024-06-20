@@ -16,7 +16,7 @@
     "seed:production": "NODE_ENV=production ts-node ./dev-data/seed/index.ts"
   },
   "keywords": [],
-  "author": "",
+  "author": "Siegfried Bozza",
   "license": "ISC",
   "description": "",
   "dependencies": {

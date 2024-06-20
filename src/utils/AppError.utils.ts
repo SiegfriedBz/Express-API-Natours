@@ -1,6 +1,6 @@
 export default class AppError extends Error {
   statusCode: number
-  statusText: 'success' | 'fail' | 'error'
+  statusText: 'fail' | 'error'
   isHandledDBError: boolean
   code: number | null
   name: string
