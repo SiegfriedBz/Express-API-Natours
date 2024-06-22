@@ -9,6 +9,9 @@ I also added comprehensive testing with Jest and SuperTest to ensure the API's r
 
 The Natours API now serves as the backend for another project I developed— a [React Single Page Application (SPA)](https://github.com/SiegfriedBz/vite_react_ts-natours) tested with Cypress — providing a seamless web application experience.
 
+To facilitate easy interaction with the API, I have included a comprehensive [Postman documentation](https://documenter.getpostman.com/view/27920009/2sA3QtcqG8).
+
+
 ## Table of Contents
 
 - [Getting Started](#getting-started)
@@ -22,6 +25,7 @@ The Natours API now serves as the backend for another project I developed— a [
   - [Protected Routes](#protected-routes)
 - [Technologies Used](#technologies-used)
 - [Deployment](#deployment)
+- [Postman Documentation](#postman-documentation)
 
 
 ## Getting Started
@@ -141,11 +145,11 @@ npm start
     # Tours Routes
     
     - GET /api/v1/tours : Fetch all tours.
-    - GET /api/v1/tours/top-5-cheap : Fetch top 5 cheap tours.
-    - GET /api/v1/tours/:tourId : Fetch tour data based on tour ID.
+    - GET /api/v1/tours/top-5-cheap : Fetch top 5 cheapest tours.
+    - GET /api/v1/tours/:tourId : Fetch a tour by tour ID.
     - GET /api/v1/tours/stats : Fetch statistics about tours.
     - GET /api/v1/tours/within/:distance/center/:latlng/unit/:unit : Fetch tours within a given distance from a point.
-    - GET /api/v1/tours/distances-from/:latlng/unit/:unit : Fetch distances to tours from a point.
+    - GET /api/v1/tours/distances-from/:latlng/unit/:unit : Fetch distances to all tours from a point.
     - GET /api/v1/tours/:id/reviews : Get all reviews for a given tour.
     
     # Users Routes
@@ -167,7 +171,7 @@ npm start
 
     # Logged in as user routes
 
-    - GET /api/v1/bookings/checkout-session/:tourId : Get the Stripe checkout session for a tour.
+    - GET /api/v1/bookings/checkout-session/:tourId : Get the Stripe checkout session for a booking on a tour.
     - GET /api/v1/users/me : Fetch the logged-in user's profile.
     - POST /api/v1/users/forgot-my-password : Step 1 in the forgot/reset password process.
     - POST /api/v1/users/reset-my-password : Step 2 in the forgot/reset password process.
@@ -176,12 +180,12 @@ npm start
     - PATCH /api/v1/users/delete-me : Deactivate the logged-in user's account.
     - GET /api/v1/users/my-bookings : Get the bookings belonging to the logged-in user.
     - POST /api/v1/tours/:id/reviews : Create a review for a tour.
-    - PATCH /api/v1/reviews/:reviewId : Update a review for a tour.
+    - PATCH /api/v1/reviews/:reviewId : Update a review.
     
     # Logged in as admin routes
     
     - GET /api/v1/users : Get all users data.
-    - GET /api/v1/users/:userId : Get user data based on the user ID.
+    - GET /api/v1/users/:userId : Get user by user ID.
     - PATCH /api/v1/users/:userId : Update user data (name and/or role).
     - GET /api/v1/tours/:id/bookings : Fetch all bookings for a tour.
     - GET /api/v1/bookings : Fetch all bookings.
@@ -203,7 +207,7 @@ npm start
     - POST /stripe/webhook : Endpoint for Stripe webhook.
     - Allows Stripe to send events after user checkout.
     - Listens for `checkout.session.completed` events.
-    - Creates a booking record in the database upon receiving `checkout.session.completed`.
+    - Creates a booking record in the database upon receiving `checkout.session.completed` event.
     
 
 ## Technologies Used
@@ -238,6 +242,9 @@ npm start
 
 ## Deployment
 The Natours API is deployed on Render.com
+
+## Postman Documentation
+[Postman](https://documenter.getpostman.com/view/27920009/2sA3QtcqG8)
 
 
 
