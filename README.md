@@ -25,7 +25,7 @@ To facilitate easy interaction with the API, I have included a comprehensive [Po
   - [Protected Routes](#protected-routes)
 - [Technologies Used](#technologies-used)
 - [Deployment](#deployment)
-- [Postman Documentation](#postman-documentation)
+- [Postman Documentation](#postman-documentation) 🚀
 
 
 ## Getting Started
